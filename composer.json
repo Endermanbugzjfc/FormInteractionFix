@@ -1,0 +1,8 @@
+{
+    "require-dev": {
+        "pocketmine/pocketmine-mp": "^4",
+        "sof3/await-generator": "^3.4",
+        "sof3/await-std": "dev-master",
+        "phpstan/phpstan": "^1.8"
+    }
+}
