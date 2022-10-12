@@ -72,29 +72,34 @@ class PlayerSession {
 			false,
 			$this->player
 		);
-		[, $event] = yield from Await::race([
-			$this->std->awaitEvent(
-				DataPacketReceiveEvent::class,
-				fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player->getNetworkSession() && $event->getPacket() instanceof ModalFormResponsePacket,
-				false,
-				EventPriority::MONITOR,
-				false,
-				$this->player
-			),
-			$this->std->awaitEvent(
-				PlayerInteractEvent::class,
-				fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
-				false,
-				EventPriority::LOW, // One level ahead of NORMAL.
-				false,
-				$this->player
-			)
-		]);
 
-		if ($event instanceof PlayerInteractEvent) {
-			$event->cancel();
-			$this->counter->sendWithoutWait(null);
-		}
+		$event = null;
+		do {
+			[, $event] = yield from Await::race([
+				$this->std->awaitEvent(
+					DataPacketReceiveEvent::class,
+					fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player->getNetworkSession() && $event->getPacket() instanceof ModalFormResponsePacket,
+					false,
+					EventPriority::MONITOR,
+					false,
+					$this->player
+				),
+				$this->std->awaitEvent(
+					PlayerInteractEvent::class,
+					fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
+					false,
+					EventPriority::LOW, // One level ahead of NORMAL.
+					false,
+					$this->player
+				)
+			]);
+
+			$interaction = $event instanceof PlayerInteractEvent;
+			if ($interaction) {
+				$event->cancel();
+				$this->counter->sendWithoutWait(null);
+			}
+		} while ($interaction);
 	}
 
 	/**
