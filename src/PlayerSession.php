@@ -7,9 +7,13 @@ namespace Endermanbugzjfc\FormInteractionFix;
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitGenerator\Channel;
 use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
+use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\player\Player;
 
 class PlayerSession {
@@ -24,6 +28,8 @@ class PlayerSession {
 		private AwaitStd $std,
 		\Logger $log
 	) {
+		$this->counter = new Channel();
+
 		Await::f2c(function () : \Generator {
 			try {
 				while ($this->player->isOnline()) {
@@ -40,15 +46,18 @@ class PlayerSession {
 					$new = yield from $this->logLoop($count);
 				} while (is_int($new)); // Null = count unchanged in past 20 ticks.
 				$log->debug($new); // Cancelled X interactions from ...
-			})
+			}
 		});
 	}
 
+	/**
+	 * @return \Generator<mixed, mixed, mixed, void>
+	 */
 	public function mainLoop() : \Generator {
 		yield from $this->std->awaitEvent(
 			DataPacketSendEvent::class,
 			function (DataPacketSendEvent $event) : bool {
-				if (in_array($this->player, $event->getTargets(), true)) {
+				if (in_array($this->player->getNetworkSession(), $event->getTargets(), true)) {
 					foreach ($event->getPackets() as $pk) {
 						if ($pk instanceof ModalFormRequestPacket) {
 							return true;
@@ -66,12 +75,12 @@ class PlayerSession {
 		[, $event] = yield from Await::race([
 			$this->std->awaitEvent(
 				DataPacketReceiveEvent::class,
-				fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player && $event->getPacket() instanceof ModalFormResponsePacket,
+				fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player->getNetworkSession() && $event->getPacket() instanceof ModalFormResponsePacket,
 				false,
 				EventPriority::MONITOR,
 				false,
 				$this->player
-			]),
+			),
 			$this->std->awaitEvent(
 				PlayerInteractEvent::class,
 				fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
@@ -79,8 +88,8 @@ class PlayerSession {
 				EventPriority::LOW, // One level ahead of NORMAL.
 				false,
 				$this->player
-			);
-		}
+			)
+		]);
 
 		if ($event instanceof PlayerInteractEvent) {
 			$event->cancel();
@@ -88,6 +97,9 @@ class PlayerSession {
 		}
 	}
 
+	/**
+	 * @return \Generator<mixed, mixed, mixed, string|int> Log message | ++$counter.
+	 */
 	public function logLoop(int $count) : \Generator {
 		$new = yield from $this->std->timeout($this->counter->receive(), 20, $count);
 		if ($new !== null) {
@@ -96,3 +108,4 @@ class PlayerSession {
 
 		return ++$count;
 	}
+}
