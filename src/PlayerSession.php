@@ -59,8 +59,12 @@ class PlayerSession {
 			function (DataPacketSendEvent $event) : bool {
 				if (in_array($this->player->getNetworkSession(), $event->getTargets(), true)) {
 					foreach ($event->getPackets() as $pk) {
-						if ($pk instanceof ModalFormRequestPacket) {
-							return true;
+						switch (true) {
+							case $pk instanceof NpcDialoguePacket:
+								return true;
+
+							default:
+								return $pk instanceof ;
 						}
 					}
 				}
