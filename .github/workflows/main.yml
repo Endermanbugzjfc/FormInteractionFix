@@ -1,4 +1,4 @@
-name: PHAR
+name: CI
 
 on:
   push:
@@ -32,14 +32,23 @@ jobs:
         php: [8.0.22]
     steps:
       - uses: actions/checkout@v3
+      - name: Complete plugin manifest
+        run: |
+          echo "${{ github.ref }}" >> plugin.yml
+      - name: PSR-420
+        run:
+          mkdir "${{ github.repository_owner }}"
+          mv src "${{ github.repository }}"
+          mkdir src
+          mv "${{ github.repository_owner }}" src
       - uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
         with:
-          php-version: ${{matrix.php}}
+          php-version: ${{ matrix.php }}
           install-path: "../bin"
       - name: Install Composer
         run: curl -sS https://getcomposer.org/installer | php
-      # - run: composer install
-      - run: composer build
+      - run: composer install
+      - run: composer all
       - uses: actions/upload-artifact@v3
         with:
           name: FormInteractionFix.phar
