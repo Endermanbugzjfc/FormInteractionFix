@@ -35,7 +35,7 @@ class PlayerSession {
 		do {
 			$event = yield from $this->std->awaitEvent(
 				DataPacketReceiveEvent::class,
-				fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player,
+				fn(DataPacketReceiveEvent $event) : bool => $event->getOrigin() === $this->player->getNetworkSession(),
 				false,
 				EventPriority::MONITOR,
 				false,
@@ -82,10 +82,13 @@ class PlayerSession {
 	 * @return \Generator<mixed, mixed, mixed, string>
 	 */
 	private function awaitPacket(string ...$expect) : \Generator {
+		/**
+		 * @var Packet $pk
+		 */
 		[$got, $pk] = yield from Await::race([
-			self::FORM_REQUEST => $thia->awaitPacketSend(ModalFormRequestPacket::class),
-			self::FORM_RESPONSE => $thia->awaitPacketReceive(ModalFormResponsePacket::class),
-			self::DIALOGUE_OPEN => $thia->awaitPacketSend(NpcDialoguePacket::class)
+			self::FORM_REQUEST => $this->awaitPacketSend(ModalFormRequestPacket::class),
+			self::FORM_RESPONSE => $this->awaitPacketReceive(ModalFormResponsePacket::class),
+			self::DIALOGUE_OPEN => $this->awaitPacketSend(NpcDialoguePacket::class)
 		]);
 		if ($pk instanceof NpcDialoguePacket) {
 			$action = $pk->getActionType();
@@ -98,7 +101,8 @@ class PlayerSession {
 
 		if (!in_array($got, $expect, true)) {
 			$expectList = implode(" / ", $expect);
-			$this->log->logException($this->player->getName() . "'s session expects $expectList, got $got");
+			$this->log->logException(new \RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
+		}
 
 		return $got;
 	}
