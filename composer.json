@@ -3,6 +3,31 @@
         "pocketmine/pocketmine-mp": "^4",
         "sof3/await-generator": "^3.4",
         "sof3/await-std": "dev-master",
-        "phpstan/phpstan": "^1.8"
+        "phpstan/phpstan": "^1.8",
+        "friendsofphp/php-cs-fixer": "^3.12"
+    },
+    "scripts": {
+        "all": [
+            "composer fmt",
+            "composer lint",
+            "composer build"
+        ],
+        "deps": [
+            "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/v.dl/SOF3/await-generator/await-generator/^3.4.2",
+            "[ -f hack/await-std.phar ] || wget -O hack/await-std.phar https://poggit.pmmp.io/v.dl/SOF3/await-/await-generator/^3.4.2"
+        ],
+        "fmt": [
+            "php-cs-fixer fix"
+        ],
+        "lint": [
+            "phpstan analyze"
+        ],
+        "build": [
+            "[ -f hack/ConsoleScript.php ] || wget -O hack/ConsoleScript.sh https://github.com/pmmp/DevTools/raw/master/src/ConsoleScript.php",
+            "php -dphar.readonly=0 dev/ConsoleScript.php --make plugin.yml,src,resources --out hack/output.phar",
+            "php -dphar.readonly=0 hack/ConsoleScript.sh --make plugin.yml,src",
+            "php -dphar.readonly=0 hack/await-generator.phar hack/output.phar",
+            "php -dphar.readonly=0 hack/await-std.phar hack/output.phar"
+        ]
     }
 }

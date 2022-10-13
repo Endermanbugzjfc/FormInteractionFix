@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Endermanbugzjfc\FormInteractionFix;
 
-use SOFe\AwaitGenerator\Await;
-use SOFe\AwaitGenerator\Channel;
-use SOFe\AwaitStd\AwaitStd;
-use SOFe\AwaitStd\DisposeException;
+use AssertionError;
+use Generator;
+use Logger;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -17,15 +16,20 @@ use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\player\Player;
+use RuntimeException;
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
+use function implode;
+use function in_array;
 
 class PlayerSession {
-
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
-		private \Logger $log // Assertions are logged as runtime exceptions with player name specified.
+		private Logger $log // Assertions are logged as runtime exceptions with player name specified.
 	) {
-		Await::f2c(function () : \Generator {
+		Await::f2c(function () : Generator {
 			try {
 				while ($this->player->isOnline()) {
 					yield from $this->mainLoop();
@@ -39,9 +43,9 @@ class PlayerSession {
 	/**
 	 * @template T of Packet
 	 * @phpstan-param class-string<T> $pkType
-	 * @return \Generator<mixed, mixed, mixed, T>
+	 * @return Generator<mixed, mixed, mixed, T>
 	 */
-	public function awaitPacketReceive(string $pkType) : \Generator {
+	public function awaitPacketReceive(string $pkType) : Generator {
 		do {
 			$event = yield from $this->std->awaitEvent(
 				DataPacketReceiveEvent::class,
@@ -62,9 +66,9 @@ class PlayerSession {
 	/**
 	 * @template T of Packet
 	 * @phpstan-param class-string<T> $pkType
-	 * @return \Generator<mixed, mixed, mixed, T>
+	 * @return Generator<mixed, mixed, mixed, T>
 	 */
-	public function awaitPacketSend(string $pkType) : \Generator {
+	public function awaitPacketSend(string $pkType) : Generator {
 		do {
 			$event = yield from $this->std->awaitEvent(
 				DataPacketSendEvent::class,
@@ -89,9 +93,9 @@ class PlayerSession {
 	private const DIALOGUE_CLOSE = "dialogue close";
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, string>
+	 * @return Generator<mixed, mixed, mixed, string>
 	 */
-	private function awaitPacket(string ...$expect) : \Generator {
+	private function awaitPacket(string ...$expect) : Generator {
 		do {
 			/**
 			 * @var Packet $pk
@@ -113,7 +117,7 @@ class PlayerSession {
 			$shouldReturn = in_array($got, $expect, true);
 			if (!$shouldReturn) {
 				$expectList = implode(" / ", $expect);
-				$this->log->logException(new \RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
+				$this->log->logException(new RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
 			}
 		} while (!$shouldReturn);
 
@@ -121,24 +125,24 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, void>
+	 * @return Generator<mixed, mixed, mixed, void>
 	 */
-	public function mainLoop() : \Generator {
+	public function mainLoop() : Generator {
 		do {
 			[, $event] = yield from Await::race([
 				match (yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN)) {
 					self::FORM_REQUEST => $this->awaitPacket(self::FORM_RESPONSE),
 					self::DIALOGUE_OPEN => $this->awaitPacket(self::DIALOGUE_CLOSE),
-					default => throw new \AssertionError("awaitPacket() generator resolved unexpectedly")
+					default => throw new AssertionError("awaitPacket() generator resolved unexpectedly")
 				},
 				$this->std->awaitEvent(
 					PlayerInteractEvent::class,
 					fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
 					false,
-						EventPriority::LOW, // One level ahead of NORMAL.
-						false,
-						$this->player
-					)
+					EventPriority::LOW, // One level ahead of NORMAL.
+					false,
+					$this->player
+				)
 			]);
 
 			if ($event instanceof PlayerInteractEvent) {

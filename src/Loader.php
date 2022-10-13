@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Endermanbugzjfc\FormInteractionFix;
 
-use SOFe\AwaitStd\AwaitStd;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\plugin\PluginBase;
+use SOFe\AwaitStd\AwaitStd;
 
 class Loader extends PluginBase implements Listener {
-
 	private AwaitStd $std;
 
 	protected function onEnable() : void {

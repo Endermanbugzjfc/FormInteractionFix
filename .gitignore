@@ -1,2 +1,4 @@
 # PHP
 vendor
+.php-cs-fixer.cache
+hack
