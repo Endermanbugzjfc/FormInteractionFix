@@ -1,4 +1,4 @@
-name: CI
+name: PHAR
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "${{ github.ref }}" >> plugin.yml
       - name: PSR-420
-        run:
+        run: |
           mkdir "${{ github.repository_owner }}"
           mv src "${{ github.repository }}"
           mkdir src
