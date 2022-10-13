@@ -54,6 +54,8 @@ jobs:
         run: curl -sS https://getcomposer.org/installer | php
       - run: composer install
       - run: composer all
+      - name: Rename artifact
+        run: mv hack/output.phar hack/FormInteractionFix.phar
       - uses: actions/upload-artifact@v3
         with:
           name: FormInteractionFix.phar
