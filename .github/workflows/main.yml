@@ -1,4 +1,4 @@
-name: PHAR
+name: CI
 
 on:
   push:
@@ -32,9 +32,14 @@ jobs:
         php: [8.0.22]
     steps:
       - uses: actions/checkout@v3
-      - name: Complete plugin manifest
+      - name: Complete plugin manifest with release tag
+        if: github.event_name == 'release'
         run: |
           echo "${{ github.ref }}" >> plugin.yml
+      - name: Complete plugin manifest with commit SHA
+        if: github.event_name != 'release'
+        run: |
+          echo "${{ github.sha }}" >> plugin.yml
       - name: PSR-420
         run: |
           mkdir "${{ github.repository_owner }}"
@@ -52,4 +57,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: FormInteractionFix.phar
-          path: hack/output.phar
+          path: hack/FormInteractionFix.phar
