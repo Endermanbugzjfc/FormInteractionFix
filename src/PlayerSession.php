@@ -92,60 +92,60 @@ class PlayerSession {
 	 * @return \Generator<mixed, mixed, mixed, string>
 	 */
 	private function awaitPacket(string ...$expect) : \Generator {
-		/**
-		 * @var Packet $pk
-		 */
-		[$got, $pk] = yield from Await::race([
-			self::FORM_REQUEST => $this->awaitPacketSend(ModalFormRequestPacket::class),
-			self::FORM_RESPONSE => $this->awaitPacketReceive(ModalFormResponsePacket::class),
-			self::DIALOGUE_OPEN => $this->awaitPacketSend(NpcDialoguePacket::class)
-		]);
-		if ($pk instanceof NpcDialoguePacket) {
-			$action = $pk->getActionType();
-			if ($action === $pk::ACTION_CLOSE) {
-				$got = self::DIALOGUE_CLOSE;
-			} elseif ($action !== $pk::ACTION_OPEN) {
-				$got = "unsupported dialogue action '$action'";
+		do {
+			/**
+			 * @var Packet $pk
+			 */
+			[$got, $pk] = yield from Await::race([
+				self::FORM_REQUEST => $this->awaitPacketSend(ModalFormRequestPacket::class),
+				self::FORM_RESPONSE => $this->awaitPacketReceive(ModalFormResponsePacket::class),
+				self::DIALOGUE_OPEN => $this->awaitPacketSend(NpcDialoguePacket::class)
+			]);
+			if ($pk instanceof NpcDialoguePacket) {
+				$action = $pk->getActionType();
+				if ($action === $pk::ACTION_CLOSE) {
+					$got = self::DIALOGUE_CLOSE;
+				} elseif ($action !== $pk::ACTION_OPEN) {
+					$got = "unsupported dialogue action '$action'";
+				}
 			}
-		}
 
-		if (!in_array($got, $expect, true)) {
-			$expectList = implode(" / ", $expect);
-			$this->log->logException(new \RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
-		}
+			$shouldReturn = in_array($got, $expect, true);
+			if (!$shouldReturn) {
+				$expectList = implode(" / ", $expect);
+				$this->log->logException(new \RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
+			}
+		} while (!$shouldReturn);
 
-		return $got; // One of the enum in $expect || unsupported dialogue action...
+		return $got; // One of the enum in $expect
 	}
 
 	/**
 	 * @return \Generator<mixed, mixed, mixed, void>
 	 */
 	public function mainLoop() : \Generator {
-		$interactRacer = match (yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN)) {
-			self::FORM_REQUEST => $this->awaitPacket(self::FORM_RESPONSE),
-			self::DIALOGUE_OPEN => $this->awaitPacket(self::DIALOGUE_CLOSE),
-			default => null
-		};
-		if ($interactRacer !== null) {
-			do {
-				[, $event] = yield from Await::race([
-					$interactRacer,
-					$this->std->awaitEvent(
-						PlayerInteractEvent::class,
-						fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
-						false,
+		do {
+			[, $event] = yield from Await::race([
+				match (yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN)) {
+					self::FORM_REQUEST => $this->awaitPacket(self::FORM_RESPONSE),
+					self::DIALOGUE_OPEN => $this->awaitPacket(self::DIALOGUE_CLOSE),
+					default => throw new \AssertionError("awaitPacket() generator resolved unexpectedly")
+				},
+				$this->std->awaitEvent(
+					PlayerInteractEvent::class,
+					fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
+					false,
 						EventPriority::LOW, // One level ahead of NORMAL.
 						false,
 						$this->player
 					)
-				]);
+			]);
 
-				if ($event instanceof PlayerInteractEvent) {
-					$event->cancel();
-				} else {
-					break;
-				}
-			} while (true);
-		}
+			if ($event instanceof PlayerInteractEvent) {
+				$event->cancel();
+			} else {
+				break;
+			}
+		} while (true);
 	}
 }
