@@ -23,9 +23,19 @@ class PlayerSession {
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
-		private \Logger $log
+		private \Logger $log // Assertions are logged as runtime exceptions with player name specified.
 	) {
+		Await::f2c(function () : \Generator {
+			try {
+				while ($this->player->isOnline()) {
+					yield from $this->mainLoop();
+				}
+			} catch (DisposeException $_) {
+				// Player quits.
+			}
+		});
 	}
+
 	/**
 	 * @template T of Packet
 	 * @phpstan-param class-string<T> $pkType
@@ -44,9 +54,9 @@ class PlayerSession {
 
 			$pk = $event->getPacket();
 			if ($pk instanceof $pkType) {
-				return $pk;
+				return $pk; // Returns the first if has >1 packets of same type.
 			}
-		} while (true); // Break when has suitable packet to return.
+		} while (true); // Breaks when has suitable packet to return.
 	}
 
 	/**
@@ -70,7 +80,7 @@ class PlayerSession {
 					return $pk;
 				}
 			}
-		} while (true); // Break when has suitable packet to return.
+		} while (true); // Breaks when has suitable packet to return.
 	}
 
 	private const FORM_REQUEST = "form request";
@@ -104,7 +114,7 @@ class PlayerSession {
 			$this->log->logException(new \RuntimeException($this->player->getName() . "'s session expects $expectList, got $got"));
 		}
 
-		return $got;
+		return $got; // One of the enum in $expect || unsupported dialogue action...
 	}
 
 	/**
