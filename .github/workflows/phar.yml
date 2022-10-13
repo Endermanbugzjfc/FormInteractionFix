@@ -1,0 +1,46 @@
+name: PHAR
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+  workflow_dispatch:
+  
+jobs:
+  build-php:
+    name: Prepare PHP
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [8.0.22]
+    steps:
+      - name: Build and prepare PHP cache
+        uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
+        with:
+          php-version: ${{ matrix.php }}
+          install-path: "../bin"
+
+  phar:
+    name: Build PHAR
+    permissions:
+      contents: write
+    needs: [build-php]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [8.0.22]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
+        with:
+          php-version: ${{matrix.php}}
+          install-path: "../bin"
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php
+      # - run: composer install
+      - run: composer build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: FormInteractionFix.phar
+          path: hack/FormInteractionFix.phar
