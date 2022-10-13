@@ -18,18 +18,11 @@ use pocketmine\player\Player;
 
 class PlayerSession {
 
-	/**
-	 * @var Channel<null>
-	 */
-	private Channel $counter;
-
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
-		\Logger $log
+		\Logger $_
 	) {
-		$this->counter = new Channel();
-
 		Await::f2c(function () : \Generator {
 			try {
 				while ($this->player->isOnline()) {
@@ -37,15 +30,6 @@ class PlayerSession {
 				}
 			} catch (DisposeException $_) {
 				// Player quits.
-			}
-		});
-		Await::f2c(function () use ($log) : \Generator {
-			while ($this->player->isOnline()) {
-				$count = 0;
-				do {
-					$new = yield from $this->logLoop($count);
-				} while (is_int($new)); // Null = count unchanged in past 20 ticks.
-				$log->debug($new); // Cancelled X interactions from ...
 			}
 		});
 	}
@@ -101,20 +85,7 @@ class PlayerSession {
 			$interaction = $event instanceof PlayerInteractEvent;
 			if ($interaction) {
 				$event->cancel();
-				$this->counter->sendWithoutWait(null);
 			}
 		} while ($interaction);
-	}
-
-	/**
-	 * @return \Generator<mixed, mixed, mixed, string|int> Log message | ++$counter.
-	 */
-	public function logLoop(int $count) : \Generator {
-		$new = yield from $this->std->timeout($this->counter->receive(), 20, $count);
-		if ($new !== null) {
-			return "Cancelled $new interactions from '{$this->player->getName()}' in the past 20 ticks";
-		}
-
-		return ++$count;
 	}
 }
