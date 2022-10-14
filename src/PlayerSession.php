@@ -7,13 +7,6 @@ namespace Endermanbugzjfc\FormInteractionFix;
 use AssertionError;
 use Generator;
 use Logger;
-use RuntimeException;
-use SOFe\AwaitGenerator\Await;
-use SOFe\AwaitGenerator\Loading;
-use SOFe\AwaitStd\AwaitStd;
-use SOFe\AwaitStd\DisposeException;
-use function implode;
-use function in_array;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -23,9 +16,15 @@ use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\player\Player;
+use RuntimeException;
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitGenerator\Loading;
+use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
+use function implode;
+use function in_array;
 
 class PlayerSession {
-
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
@@ -35,10 +34,10 @@ class PlayerSession {
 	}
 
 	/**
-	 * @param \Generator<mixed, mixed, mixed, bool> $gen False = continue looping; True = break.
-	 * @return \Generator<mixed, mixed, mixed, void>
+	 * @param Generator<mixed, mixed, mixed, bool> $gen False = continue looping; True = break.
+	 * @return Generator<mixed, mixed, mixed, void>
 	 */
-	private function loop(\Generator $gen) : \Generator {
+	private function loop(Generator $gen) : Generator {
 		try {
 			while ($this->player->isOnline()) {
 				if (yield from $gen) {
@@ -152,9 +151,9 @@ class PlayerSession {
 
 	/**
 	 * @param Loading<void> $until
-	 * @return \Generator<mixed, mixed, mixed, bool>
+	 * @return Generator<mixed, mixed, mixed, bool>
 	 */
-	public function interactionBlockingLoop(Loading $until) : \Generator {
+	public function interactionBlockingLoop(Loading $until) : Generator {
 		[, $event] = yield from Await::race([
 			$this->std->awaitEvent(
 				PlayerInteractEvent::class,
