@@ -57,6 +57,9 @@ jobs:
       - name: Rename artifact
         run: mv hack/output.phar hack/FormInteractionFix.phar
       - uses: actions/upload-artifact@v3
+        if: github.event_name != 'release'
         with:
-          name: FormInteractionFix.phar
+          name: FormInteractionFix
           path: hack/FormInteractionFix.phar
+          retention-days: 1 # default 90.
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
