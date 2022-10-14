@@ -11,7 +11,7 @@ This plugin sets interaction-spam protection for both forms and NPC dialogues.
 By listening for packets and block interaction after a form or dialogue is sent to the player.
 Until the player closes the form. For dialogues, until the server sent another close action.
 
-# Compatibilty
+# Compatibility
 As this plugin is driven by packets, it works globally on the server.
 Existing plugins that have no interaction cooldown will acquire the protection.
 Future plugins can also choose to depend on this plugin instead of verbosely implementing an interaction cool down on their own.
