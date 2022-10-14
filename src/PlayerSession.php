@@ -7,6 +7,13 @@ namespace Endermanbugzjfc\FormInteractionFix;
 use AssertionError;
 use Generator;
 use Logger;
+use RuntimeException;
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitGenerator\Loading;
+use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
+use function implode;
+use function in_array;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -16,28 +23,31 @@ use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\player\Player;
-use RuntimeException;
-use SOFe\AwaitGenerator\Await;
-use SOFe\AwaitStd\AwaitStd;
-use SOFe\AwaitStd\DisposeException;
-use function implode;
-use function in_array;
 
 class PlayerSession {
+
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
 		private Logger $log // Assertions are logged as runtime exceptions with player name specified.
 	) {
-		Await::f2c(function () : Generator {
-			try {
-				while ($this->player->isOnline()) {
-					yield from $this->mainLoop();
+		$this->loop($this->mainLoop());
+	}
+
+	/**
+	 * @param \Generator<mixed, mixed, mixed, bool> $gen False = continue looping; True = break.
+	 * @return \Generator<mixed, mixed, mixed, void>
+	 */
+	private function loop(\Generator $gen) : \Generator {
+		try {
+			while ($this->player->isOnline()) {
+				if (yield from $gen) {
+					break;
 				}
-			} catch (DisposeException $_) {
-				// Player quits.
 			}
-		});
+		} catch (DisposeException $_) {
+			// Player quits.
+		}
 	}
 
 	/**
@@ -125,32 +135,42 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return Generator<mixed, mixed, mixed, void>
+	 * @return Generator<mixed, mixed, mixed, bool>
 	 */
 	public function mainLoop() : Generator {
 		$got = yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN);
-		do {
-			[, $event] = yield from Await::race([
-				match ($got) {
-					self::FORM_REQUEST => $this->awaitPacket(self::FORM_RESPONSE),
-					self::DIALOGUE_OPEN => $this->awaitPacket(self::DIALOGUE_CLOSE),
-					default => throw new AssertionError("awaitPacket() generator resolved unexpectedly")
-				},
-				$this->std->awaitEvent(
-					PlayerInteractEvent::class,
-					fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
-					false,
-					EventPriority::LOW, // One level ahead of NORMAL.
-					false,
-					$this->player
-				)
-			]);
+		$until = match ($got) {
+			self::FORM_REQUEST => new Loading(fn() => yield from $this->awaitPacket(self::FORM_RESPONSE)),
+			self::DIALOGUE_OPEN => new Loading(fn() => yield from $this->awaitPacket(self::DIALOGUE_CLOSE)),
+			default => throw new AssertionError("awaitPacket() generator resolved unexpectedly")
+		};
+		$this->loop($this->interactionBlockingLoop($until));
+		yield from $until->get();
 
-			if ($event instanceof PlayerInteractEvent) {
-				$event->cancel();
-			} else {
-				break;
-			}
-		} while (true);
+		return false;
+	}
+
+	/**
+	 * @param Loading<void> $until
+	 * @return \Generator<mixed, mixed, mixed, bool>
+	 */
+	public function interactionBlockingLoop(Loading $until) : \Generator {
+		[, $event] = yield from Await::race([
+			$this->std->awaitEvent(
+				PlayerInteractEvent::class,
+				fn(PlayerInteractEvent $event) : bool => $event->getPlayer() === $this->player,
+				false,
+				EventPriority::LOW, // One level ahead of NORMAL.
+				false,
+				$this->player
+			),
+			$until->get()
+		]);
+		if ($event instanceof PlayerInteractEvent) {
+			$event->cancel();
+			return false;
+		}
+
+		return true;
 	}
 }
