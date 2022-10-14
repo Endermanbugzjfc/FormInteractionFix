@@ -128,9 +128,10 @@ class PlayerSession {
 	 * @return Generator<mixed, mixed, mixed, void>
 	 */
 	public function mainLoop() : Generator {
+		$got = yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN);
 		do {
 			[, $event] = yield from Await::race([
-				match (yield from $this->awaitPacket(self::FORM_REQUEST, self::DIALOGUE_OPEN)) {
+				match ($got) {
 					self::FORM_REQUEST => $this->awaitPacket(self::FORM_RESPONSE),
 					self::DIALOGUE_OPEN => $this->awaitPacket(self::DIALOGUE_CLOSE),
 					default => throw new AssertionError("awaitPacket() generator resolved unexpectedly")
