@@ -35,11 +35,11 @@ jobs:
       - name: Complete plugin manifest with release tag
         if: github.event_name == 'release'
         run: |
-          echo "${{ github.ref }}" >> plugin.yml
+          echo "version: ${{ github.ref }}" >> plugin.yml
       - name: Complete plugin manifest with commit SHA
         if: github.event_name != 'release'
         run: |
-          echo "${{ github.sha }}" >> plugin.yml
+          echo "version: ${{ github.sha }}" >> plugin.yml
       - name: PSR-420
         run: |
           mkdir "${{ github.repository_owner }}"
