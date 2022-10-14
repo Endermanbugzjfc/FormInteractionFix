@@ -15,3 +15,6 @@ Until the player closes the form. For dialogues, until the server sent another c
 As this plugin is driven by packets, it works globally on the server.
 Existing plugins that have no interaction cooldown will acquire the protection.
 Future plugins can also choose to depend on this plugin instead of verbosely implementing an interaction cool down on their own.
+
+# Disclaimer
+Although I kept mentioning "protection" above, this plugin can not prevent any malicious attacks or behaviours.
