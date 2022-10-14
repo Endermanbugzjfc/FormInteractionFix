@@ -72,7 +72,7 @@ class PlayerSession {
 		do {
 			$event = yield from $this->std->awaitEvent(
 				DataPacketSendEvent::class,
-				fn(DataPacketSendEvent $event) : bool => in_array($this->player, $event->getTargets(), true),
+				fn(DataPacketSendEvent $event) : bool => in_array($this->player->getNetworkSession(), $event->getTargets(), true),
 				false,
 				EventPriority::MONITOR,
 				false,
