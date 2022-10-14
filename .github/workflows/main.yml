@@ -32,6 +32,21 @@ jobs:
         php: [8.0.22]
     steps:
       - uses: actions/checkout@v3
+      - name: typos-action
+        # You may pin to the exact commit or the version.
+        # uses: crate-ci/typos@592b36d23c62cb378f6097a292bc902ee73f93ef
+        uses: crate-ci/typos@v1.0.4
+#         with:
+          # Files or patterns to check
+#           files: # optional
+          # Comma separated list of extend identifiers, like someone's name
+#           extend_identifiers: # optional
+          # Comma separated list of extend words.
+#           extend_words: # optional
+          # Ignore implicit configuration files
+#           isolated: # optional
+          # Use a custom config file.
+#           config: # optional
       - name: Complete plugin manifest with release tag
         if: github.event_name == 'release'
         run: |
