@@ -35,9 +35,9 @@ class PlayerSession {
 
 	/**
 	 * @param Generator<mixed, mixed, mixed, bool> $gen False = continue looping; True = break.
-	 * @return Generator<mixed, mixed, mixed, void>
 	 */
-	private function loop(Generator $gen) : Generator {
+	private function loop(Generator $gen) : void {
+Await::f2c(function () use ($gen) : \Generator {
 		try {
 			while ($this->player->isOnline()) {
 				if (yield from $gen) {
@@ -47,6 +47,7 @@ class PlayerSession {
 		} catch (DisposeException $_) {
 			// Player quits.
 		}
+}
 	}
 
 	/**
