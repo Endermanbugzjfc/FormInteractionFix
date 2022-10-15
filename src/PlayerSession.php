@@ -6,6 +6,7 @@ namespace Endermanbugzjfc\FormInteractionFix;
 
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitGenerator\Channel;
+use SOFe\AwaitGenerator\Loading;
 use SOFe\AwaitStd\AwaitStd;
 use SOFe\AwaitStd\DisposeException;
 use pocketmine\event\EventPriority;
@@ -51,23 +52,28 @@ class PlayerSession {
 		] = array_fill(0, 2, new Channel());
 
 		$this->loop($this->listenSend());
-		$this->loop($this->listenResponse());
-		$this->loop(function () {
-			$opened = yield from $this->opened->get();
-			$unblock = $this->blockInteraction();
-
-			$resp = yield from $this->resp->get();
-			if ($resp !== $opened) {
-				$this->weakError($this->player->getName() . "'s session expects $opened resp, got $resp resp");
-			}
-
-			$unblock();
-			return false; // This loop is supposed to only break when player quits and so returns false.
-		});
+		$this->loop($this->listenReceive());
+		$this->loop($this->mainLoop());
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, false> This loop is supposed to only break when player quits and so returns false.
+	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
+	 */
+	private function mainLoop() : \Generator {
+		$opened = yield from $this->opened->receive();
+		$unblock = $this->blockInteraction();
+
+		$closed = yield from $this->closed->receive();
+		if ($closed !== $opened) {
+			$this->weakError($this->player->getName() . "'s session expects $opened resp, got $closed resp");
+		}
+
+		$unblock();
+		return false; // This loop is supposed to only break when player quits and so returns false.
+	}
+
+	/**
+	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
 	 */
 	private function listenSend() : \Generator {
 		$sent = yield from $this->std->awaitEvent(
@@ -85,13 +91,13 @@ class PlayerSession {
 			if ($pk instanceof ModalFormRequestPacket) {
 				$opened = self::FORM;
 			} elseif ($pk instanceof NpcDialoguePacket) {
-				switch ($type = $pk->actionType) {
+				switch ($type = $pk->getActionType()) {
 					case $pk::ACTION_CLOSE:
 						$closed = self::DIALOGUE;
 						break;
 
 					case $pk::ACTION_OPEN:
-						$opened = self::DIALOGUE
+						$opened = self::DIALOGUE;
 						break;
 
 					default:
@@ -113,12 +119,12 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, false> This loop is supposed to only break when player quits and so returns false.
+	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
 	 */
 	private function listenReceive() : \Generator {
 		$received = yield from $this->std->awaitEvent(
 			DataPacketReceiveEvent::class,
-			fn($event) => $this->player->getNetworkSession() === $this->player->getOrigin(),
+			fn($event) => $this->player->getNetworkSession() === $event->getOrigin(),
 			false,
 			EventPriority::MONITOR,
 			false,
@@ -179,29 +185,38 @@ class PlayerSession {
 	 * @throws \RuntimeException when called before unlocking the previous.
 	 */
 	public function blockInteraction() : callable {
-		if ($this->blockInteraction) {
+		if ($this->blockingInteraction) {
 			throw new \RuntimeException("blockInteraction() called in " . $this->player->getName() . "'s session before unlock previous might be memory leak");
 		}
 
-		$this->blockInteraction = true;
-		$until = new Loading($controller = function () {
+		$this->blockingInteraction = true;
+		$f = function () {
 			yield;
 			$this->blockingInteraction = false;
-		});
+		};
+		$controller = $f();
+		$until = new Loading(fn() => yield from $controller);
 
-		$this->loop(function () use ($until) {
-			yield from Await::race([
+		$blockInteraction = function () use ($until) {
+			[, $event] = yield from Await::race([
 				$this->std->awaitEvent(
 					PlayerInteractEvent::class,
 					fn($event) => $event->getPlayer() === $this->player,
 					false,
 					EventPriority::LOW, // One level ahead of NORMAL.
 					false,
-					$this->plasyer
+					$this->player
 				),
 				$until->get()
 			]);
-		});
+
+			if ($event instanceof PlayerInteractEvent) {
+				return false;
+			} else {
+				return true;
+			}
+		};
+		$this->loop($blockInteraction());
 
 		return fn() => $controller->rewind();
 	}
