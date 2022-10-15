@@ -211,9 +211,9 @@ class PlayerSession {
 			]);
 
 			if ($event instanceof PlayerInteractEvent) {
-				return false; // Until generator have not yet resolved, continue listening and cancelling PlayerInteractEvent.
+				return false; // $until have not yet resolved, continue listening and cancelling PlayerInteractEvent.
 			} else {
-				return true; // Until generator have resolved, break loop.
+				return true; // $until have resolved, break loop.
 			}
 		};
 		$this->loop($blockInteraction());
