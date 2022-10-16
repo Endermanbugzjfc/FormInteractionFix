@@ -78,7 +78,7 @@ class PlayerSession {
 	private function listenSend() : \Generator {
 		$sent = yield from $this->std->awaitEvent(
 			DataPacketSendEvent::class,
-			fn($event) => in_array($this->player->getNetworkSession(), $event->getTargets()),
+			fn($event) => in_array($this->player->getNetworkSession(), $event->getTargets(), true),
 			false,
 			EventPriority::MONITOR,
 			false,
