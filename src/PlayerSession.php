@@ -51,9 +51,9 @@ class PlayerSession {
 			$this->closed
 		] = array_fill(0, 2, new Channel());
 
-		$this->loop($this->listenSend());
-		$this->loop($this->listenReceive());
-		$this->loop($this->mainLoop());
+		$this->loop([$this, "listenSend"]);
+		$this->loop([$this, "listenReceive"]);
+		$this->loop([$this, "mainLoop"]);
 	}
 
 	/**
@@ -164,13 +164,13 @@ class PlayerSession {
 	}
 
 	/**
-	 * @param \Generator<mixed, mixed, mixed, bool> $gen False = continue looping; True = break.
+	 * @param callable(): \Generator<mixed, mixed, mixed, bool> $f2c False = continue looping; True = break.
 	 */
-	public function loop(\Generator $gen) : void {
-		Await::f2c(function () use ($gen) {
+	public function loop(callable $f2c) : void {
+		Await::f2c(function () use ($f2c) {
 			try {
 				while ($this->player->isOnline()) {
-					if (yield from $gen) {
+					if (yield from $f2c()) {
 						break;
 					}
 				}
@@ -216,7 +216,7 @@ class PlayerSession {
 				return true; // $until have resolved, break loop.
 			}
 		};
-		$this->loop($blockInteraction());
+		$this->loop($blockInteraction);
 
 		return fn() => $controller->rewind();
 	}

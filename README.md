@@ -1,3 +1,4 @@
+# Looking for testers and README improvers!
 # Form Interaction Fix
 [![CI](https://github.com/Endermanbugzjfc/FormInteractionFix/actions/workflows/main.yml/badge.svg)](https://github.com/Endermanbugzjfc/FormInteractionFix/actions/workflows/main.yml)
 # Interaction-spam
@@ -18,3 +19,5 @@ Future plugins can also choose to depend on this plugin instead of verbosely imp
 
 # Disclaimer
 Although I kept mentioning "protection" above, this plugin can not prevent any malicious attacks or behaviours.
+
+[]
