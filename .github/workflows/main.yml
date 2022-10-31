@@ -20,16 +20,9 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           install-path: "../bin"
-
-  phar:
-    name: Build PHAR
-    permissions:
-      contents: write
-    needs: [build-php]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php: [8.0.22]
+          
+  typo:
+    name: Typo Lint
     steps:
       - uses: actions/checkout@v3
       - name: typos-action
@@ -46,7 +39,19 @@ jobs:
           # Ignore implicit configuration files
 #           isolated: # optional
           # Use a custom config file.
-#           config: # optional
+          #           config: # optional
+          
+  phar:
+    name: Build PHAR
+    permissions:
+      contents: write
+    needs: [build-php]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [8.0.22]
+    steps:
+      - uses: actions/checkout@v3
       - name: Complete plugin manifest with release tag
         if: github.event_name == 'release'
         run: |
@@ -84,7 +89,8 @@ jobs:
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
             local_path: 'hack/FormInteractionFix.phar'
-            remote_path: '/home/container/plugins/'
+            remote_path: '/home/container/plugins/FormInteractionFix.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: true
+            
