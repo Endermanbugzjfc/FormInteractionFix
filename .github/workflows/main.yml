@@ -93,4 +93,4 @@ jobs:
             remote_path: 'plugins/FormInteractionFix.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
-            # delete_remote_files: true
+            delete_remote_files: 1
