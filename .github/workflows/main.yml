@@ -90,7 +90,7 @@ jobs:
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
             local_path: 'hack/FormInteractionFix.phar'
-            remote_path: '/home/container/plugins/FormInteractionFix.phar'
+            remote_path: 'plugins/FormInteractionFix.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: true
