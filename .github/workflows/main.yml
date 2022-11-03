@@ -6,7 +6,7 @@ on:
   release:
     types: [created]
   workflow_dispatch:
-  
+
 jobs:
   build-php:
     name: Prepare PHP
@@ -20,7 +20,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           install-path: "../bin"
-          
+
   typo:
     name: Typo Lint
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
 #           isolated: # optional
           # Use a custom config file.
           #           config: # optional
-          
+
   phar:
     name: Build PHAR
     permissions:
