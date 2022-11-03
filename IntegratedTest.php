@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Endermanbugzjfc\FormInteractionFix_IntegratedTest;
 
 use Closure;
+use RuntimeException;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\form\Form;
+use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
-use RuntimeException;
 
 /**
  * @name FormInteractionFix_IntegratedTest
@@ -37,6 +39,8 @@ use RuntimeException;
 class IntegratedTest extends PluginBase implements Listener {
 	protected function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+        $timeout = 15 * 20;
+        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => throw new \RuntimeException("Timeout: $timeout ticks")), $timeout);
 	}
 
 	protected function onDisable() : void {
@@ -55,6 +59,15 @@ class IntegratedTest extends PluginBase implements Listener {
 			return;
 		}
 		$this->spammer = $event->getPlayer();
+        $this->spammer->getInventory()->setItemInHand(VanillaItems::DIAMOND_SWORD());
+        $pos = $this->spammer->getPosition();
+        for ($x = $pos->getFloorX() - 2; $x <= $pos->getFloorX() + 2; $x++) {
+            for ($y = $pos->getFloorY() - 2; $y <= $pos->getFloorY() + 2; $y++) {
+                for ($z = $pos->getFloorZ() - 2; $z <= $pos->getFloorZ() + 2; $z++) {
+                    $pos->getWorld()->setBlockAt($x, $y, $z, VanillaBlocks::BEDROCK());
+                }
+            }
+        }
 
 		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 1);
 	}
@@ -67,6 +80,10 @@ class IntegratedTest extends PluginBase implements Listener {
 	 * @priority NORMAL
 	 */
 	public function sendFormWhenInteract(PlayerInteractEvent $event) : void {
+        if ($event->getPlayer() !== $this->spammer)  {
+            return;
+        }
+
 		if ($this->sent) {
 			throw new RuntimeException("Form interaction fix failed");
 		}
@@ -93,15 +110,16 @@ class IntegratedTest extends PluginBase implements Listener {
 				];
 			}
 
-			public function handleResponse(Player $_, $_) : void {
+			public function handleResponse(Player $_, $__) : void {
 				($this->close)();
 			}
 		});
 
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("form button 0")), 5 * 20);
+		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->controlSpammer("form button 0")), 5 * 20);
 
 		$this->sent = true;
 		$this->sentCount++;
+        $this->getLogger()->notice("Sent form ++");
 	}
 
 	private function controlSpammer(string $subCommand) : void {
