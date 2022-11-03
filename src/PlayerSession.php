@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Endermanbugzjfc\FormInteractionFix;
 
-use SOFe\AwaitGenerator\Await;
-use SOFe\AwaitGenerator\Channel;
-use SOFe\AwaitGenerator\Loading;
-use SOFe\AwaitStd\AwaitStd;
-use SOFe\AwaitStd\DisposeException;
+use Generator;
+use Logger;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -19,20 +16,28 @@ use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\NpcRequestPacket;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
+use RuntimeException;
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitGenerator\Channel;
+use SOFe\AwaitGenerator\Loading;
+use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
+use function array_fill;
+use function implode;
+use function in_array;
 
 class PlayerSession {
-
 	private const FORM = "form";
 	private const DIALOGUE = "dialogue";
 
 	/**
 	 * Enum of above constants.
-	 * @var Channel<string> 
+	 * @var Channel<string>
 	 */
 	private Channel $opened;
 	/**
 	 * Enum of above constants.
-	 * @var Channel<string> 
+	 * @var Channel<string>
 	 */
 	private Channel $closed;
 
@@ -44,7 +49,7 @@ class PlayerSession {
 	public function __construct(
 		private Player $player,
 		private AwaitStd $std,
-		private \Logger $log // Assertions are logged as runtime exceptions with player name specified.
+		private Logger $log // Assertions are logged as runtime exceptions with player name specified.
 	) {
 		[
 			$this->opened,
@@ -57,9 +62,9 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
+	 * @return Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
 	 */
-	private function mainLoop() : \Generator {
+	private function mainLoop() : Generator {
 		$opened = yield from $this->opened->receive();
 		$unblock = $this->blockInteraction();
 
@@ -73,9 +78,9 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
+	 * @return Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
 	 */
-	private function listenSend() : \Generator {
+	private function listenSend() : Generator {
 		$sent = yield from $this->std->awaitEvent(
 			DataPacketSendEvent::class,
 			fn($event) => in_array($this->player->getNetworkSession(), $event->getTargets(), true),
@@ -119,9 +124,9 @@ class PlayerSession {
 	}
 
 	/**
-	 * @return \Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
+	 * @return Generator<mixed, mixed, mixed, bool> This loop is supposed to only break when player quits and so returns false.
 	 */
-	private function listenReceive() : \Generator {
+	private function listenReceive() : Generator {
 		$received = yield from $this->std->awaitEvent(
 			DataPacketReceiveEvent::class,
 			fn($event) => $this->player->getNetworkSession() === $event->getOrigin(),
@@ -130,7 +135,7 @@ class PlayerSession {
 			false,
 			$this->player
 		);
-	
+
 		$pk = $received->getPacket();
 		if ($pk instanceof ModalFormResponsePacket) {
 			$this->opened->sendWithoutWait(self::FORM);
@@ -155,16 +160,16 @@ class PlayerSession {
 					break;
 			}
 		}
-			
+
 		return false; // This loop is supposed to only break when player quits and so returns false.
 	}
 
 	private function weakError(string $msg) : void {
-		$this->log->debug(implode("\n", Utils::printableExceptionInfo(new \RuntimeException($msg))));
+		$this->log->debug(implode("\n", Utils::printableExceptionInfo(new RuntimeException($msg))));
 	}
 
 	/**
-	 * @param callable(): \Generator<mixed, mixed, mixed, bool> $f2c False = continue looping; True = break.
+	 * @param callable(): Generator<mixed, mixed, mixed, bool> $f2c False = continue looping; True = break.
 	 */
 	public function loop(callable $f2c) : void {
 		Await::f2c(function () use ($f2c) {
@@ -182,11 +187,11 @@ class PlayerSession {
 
 	/**
 	 * @return callable Call to stop blocking interaction.
-	 * @throws \RuntimeException when called before unlocking the previous.
+	 * @throws RuntimeException when called before unlocking the previous.
 	 */
 	public function blockInteraction() : callable {
 		if ($this->blockingInteraction) {
-			throw new \RuntimeException("blockInteraction() called in " . $this->player->getName() . "'s session before unlock previous might be memory leak");
+			throw new RuntimeException("blockInteraction() called in " . $this->player->getName() . "'s session before unlock previous might be memory leak");
 		}
 
 		$this->blockingInteraction = true;
@@ -220,5 +225,4 @@ class PlayerSession {
 
 		return fn() => $controller->rewind();
 	}
-
 }
