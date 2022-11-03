@@ -196,7 +196,7 @@ class PlayerSession {
 
 		$this->blockingInteraction = true;
 		$f = function () {
-			yield;
+			yield from Await::promise(fn($_) => null);
 			$this->blockingInteraction = false;
 		};
 		$controller = $f();
