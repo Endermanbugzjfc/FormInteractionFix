@@ -76,12 +76,12 @@ jobs:
       - run: composer install
       - run: composer all
       - name: Rename artifact
-        run: mv hack/output.phar hack/${{ github.event.repository.name}}.phar
+        run: mv hack/output.phar hack/${{ github.event.repository.name }}.phar
       - uses: actions/upload-artifact@v3
         if: github.event_name != 'release'
         with:
-          name: ${{ github.event.repository.name}}
-          path: hack/${{ github.event.repository.name}}.phar
+          name: ${{ github.event.repository.name }}
+          path: hack/${{ github.event.repository.name }}.phar
           retention-days: 1 # default 90.
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
@@ -92,15 +92,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: ${{ github.event.repository.name}}
+          name: ${{ github.event.repository.name }}
           path: /home/runner/download
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: '/home/runner/download/${{ github.event.repository.name}}.phar'
-            remote_path: 'plugins/${{ github.event.repository.name}}.phar'
+            local_path: '/home/runner/download/FormInteractionFix.phar'
+            remote_path: 'plugins/${{ github.event.repository.name }}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: 1
@@ -122,8 +122,8 @@ jobs:
         uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
-          name: ${{ github.event.repository.name}}
-          path: /home/runner/download
+          name: ${{ github.event.repository.name }}
+          path: /home/runner/plugins
       - name: Docker create and run
         run: >
           docker rm ${{ matrix.container-prefix}}-pocketmine || true;
@@ -132,8 +132,8 @@ jobs:
           pmmp/pocketmine-mp:${{ matrix.pm }}
           start-pocketmine --debug.level=2;
 
-          wget -O /home/runner/download/FakePlayer.phar https://poggit.pmmp.io/r/146802;
-          docker cp /home/runner/download/ ${{ matrix.container-prefix }}-pocketmine:/plugins;
+          wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
+          docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
           docker start -ia ${{ matrix.container-prefix }}-pocketmine;
