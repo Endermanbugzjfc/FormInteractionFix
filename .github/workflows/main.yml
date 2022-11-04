@@ -93,9 +93,13 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ github.event.repository.name}}
+          path: ~/
       - uses: montudor/action-zip@v1
         with:
-          args: unzip -qq /home/runner/work/${{ github.event.repository.name}}/${{ github.event.repository.name}}
+          args: unzip -qq ~/${{ github.event.repository.name }} 
+      - if: failure()
+        run: |
+          tree
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
@@ -120,9 +124,13 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ github.event.repository.name}}
+          path: ~/
       - uses: montudor/action-zip@v1
         with:
           args: unzip -qq /home/runner/work/${{ github.event.repository.name}}/${{ github.event.repository.name}} -d plugins
+      - if: failure()
+        run: |
+          tree
       - name: Docker create and run
         run: >
           docker rm ${{ github.event.repository.name }}-pocketmine || true;
