@@ -135,6 +135,6 @@ jobs:
           docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
-          bash -c "sleep 30 && docker kill ${{ matrix.container-prefix }}-pocketmine";
+          sleep 30 && docker kill test &> /dev/null;
           docker start -ia ${{ matrix.container-prefix }}-pocketmine;
 # https://discord.com/channels/373199722573201408/480650036972224513/1038057748170035260
