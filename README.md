@@ -9,7 +9,7 @@ If a plugin opens its form on interaction, these players will see the form opens
 
 # The fix
 This plugin applies interaction-spam protection on forms at the moment.
-NPC dialogues will be implemented soon™.
+NPC dialogues will be supported soon™.
 By listening for packets and cancel interaction events after it is sent to the player.
 Until the player closes the form.
 
