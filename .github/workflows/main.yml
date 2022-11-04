@@ -94,12 +94,13 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ github.event.repository.name }}
+          path: ${{ github.workspace }}
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: '${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar'
+            local_path: '~/home/runner/worker/${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar'
             remote_path: 'plugins/${{ github.event.repository.name }}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
