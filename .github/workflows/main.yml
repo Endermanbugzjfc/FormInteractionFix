@@ -106,9 +106,11 @@ jobs:
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: 1
+
   test:
     name: Integrated test with Docker
     needs: [phar]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         pm: [4, 4.0.0]
