@@ -94,18 +94,12 @@ jobs:
         with:
           name: ${{ github.event.repository.name}}
           path: /home/runner/download
-      - uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq /home/runner/download/${{ github.event.repository.name }} 
-      - if: failure()
-        run: |
-          tree /home/runner/download
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: '${{ github.event.repository.name}}.phar'
+            local_path: '/home/runner/download/${{ github.event.repository.name}}.phar'
             remote_path: 'plugins/${{ github.event.repository.name}}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
@@ -125,12 +119,6 @@ jobs:
         with:
           name: ${{ github.event.repository.name}}
           path: /home/runner/download
-      - uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq /home/runner/download/${{ github.event.repository.name}}/${{ github.event.repository.name}} -d plugins
-      - if: failure()
-        run: |
-          tree /home/runner/download
       - name: Docker create and run
         run: >
           docker rm ${{ github.event.repository.name }}-pocketmine || true;
@@ -139,6 +127,6 @@ jobs:
           pmmp/pocketmine-mp:${{ matrix.pm }}
           start-pocketmine --debug.level=2;
 
-          wget -O plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
-          docker cp plugins/ ${{ github.event.repository.name}}-pocketmine:/plugins;
+          wget -O /home/runner/download/FakePlayer.phar https://poggit.pmmp.io/r/146802;
+          docker cp /home/runner/download/ ${{ github.event.repository.name}}-pocketmine:/plugins;
           docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php
