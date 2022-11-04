@@ -107,6 +107,7 @@ jobs:
       - if: failure()
         run: |
           tree /home/runner/download
+          stat /home/runner/download/${{ github.event.repository.name }}.phar
 
   test:
     name: Integrated test with Docker
