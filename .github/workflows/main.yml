@@ -136,5 +136,4 @@ jobs:
           docker cp /home/runner/download/ ${{ matrix.container-prefix }}-pocketmine:/plugins;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
-          docker run;
           docker start -ia ${{ matrix.container-prefix }}-pocketmine;
