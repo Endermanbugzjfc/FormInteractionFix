@@ -93,20 +93,21 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ github.event.repository.name }}
+          path: /home/runner/download
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: '${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar'
+            local_path: '/home/runner/download/FormInteractionFix.phar'
             remote_path: 'plugins/${{ github.event.repository.name }}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: 1
       - if: failure()
         run: |
-          tree ${{ github.event.repository.name }}
-          stat ${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar
+          tree /home/runner/download
+          stat /home/runner/download/${{ github.event.repository.name }}.phar
 
   test:
     name: Integrated test with Docker
@@ -129,10 +130,12 @@ jobs:
           docker create --name ${{ matrix.container-prefix}}-pocketmine
           -u root
           pmmp/pocketmine-mp:${{ matrix.pm }}
-          start-pocketmine --debug.level=2;
+          start-pocketmine --debug.level=2 --auto-report.enabled=0;
 
           wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
           docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
+          bash -c "sleep 30 && docker kill ${{ matrix.container-prefix }}-pocketmine";
           docker start -ia ${{ matrix.container-prefix }}-pocketmine;
+# https://discord.com/channels/373199722573201408/480650036972224513/1038057748170035260
