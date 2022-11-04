@@ -76,21 +76,62 @@ jobs:
       - run: composer install
       - run: composer all
       - name: Rename artifact
-        run: mv hack/output.phar hack/FormInteractionFix.phar
+        run: mv hack/output.phar hack/${{ github.event.repository.name}}.phar
       - uses: actions/upload-artifact@v3
         if: github.event_name != 'release'
         with:
-          name: FormInteractionFix
-          path: hack/FormInteractionFix.phar
+          name: ${{ github.event.repository.name}}
+          path: hack/${{ github.event.repository.name}}.phar
           retention-days: 1 # default 90.
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  sftp:
+    name: Sync PHAR to a private server
+    needs: [phar]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+        name: ${{ github.event.repository.name}}
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq ${{ github.event.repository.name}}.zip
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: 'hack/FormInteractionFix.phar'
-            remote_path: 'plugins/FormInteractionFix.phar'
+            local_path: '${{ github.event.repository.name}}.phar'
+            remote_path: 'plugins/${{ github.event.repository.name}}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
-            delete_remote_files: 1
+            delete_remote_files: 1  sftp:
+  test:
+    name: Integrated test with Docker
+    needs: [phar]
+    strategy:
+      matrix:
+        pm: [4, 4.0.0]
+    steps:
+      - name: Checkout for IntegratedTest.php
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+        name: ${{ github.event.repository.name}}
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq ${{ github.event.repository.name}}.zip -d plugins
+      - name: Docker create and run
+        run: >
+          docker rm ${{ github.event.repository.name }}-pocketmine || true
+          docker create --name ${{ github.event.repository.name }}-pocketmine
+          -u root
+          pmmp/pocketmine-mp:${{ matrix.pm }}
+          start-pocketmine --debug.level=2
+          bash -c 'chown -R 1000:1000 /data /plugins && su - pocketmine bash -c "start-pocketmine --debug.level=2"'
+
+          wget -O plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802
+
+          docker cp plugins/ ${{ github.event.repository.name}}-pocketmine:/plugins
+
+          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php
