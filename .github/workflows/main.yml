@@ -104,6 +104,9 @@ jobs:
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: 1
+      - if: failure()
+        run: |
+          tree /home/runner/download
 
   test:
     name: Integrated test with Docker
@@ -112,6 +115,7 @@ jobs:
     strategy:
       matrix:
         pm: [4, 4.0.0]
+        container-prefix: [form-interaction-fix]
     steps:
       - name: Checkout for IntegratedTest.php
         uses: actions/checkout@v3
@@ -121,12 +125,15 @@ jobs:
           path: /home/runner/download
       - name: Docker create and run
         run: >
-          docker rm ${{ github.event.repository.name }}-pocketmine || true;
-          docker create --name ${{ github.event.repository.name }}-pocketmine
+          docker rm ${{ matrix.container-prefix}}-pocketmine || true;
+          docker create --name ${{ matrix.container-prefix}}-pocketmine
           -u root
           pmmp/pocketmine-mp:${{ matrix.pm }}
           start-pocketmine --debug.level=2;
 
           wget -O /home/runner/download/FakePlayer.phar https://poggit.pmmp.io/r/146802;
-          docker cp /home/runner/download/ ${{ github.event.repository.name}}-pocketmine:/plugins;
-          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php
+          docker cp /home/runner/download/ ${{ matrix.container-prefix }}-pocketmine:/plugins;
+          docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
+
+          docker run
+          docker start -ia ${{ matrix.container-prefix }}-pocketmine
