@@ -105,7 +105,7 @@ jobs:
             remote_path: 'plugins/${{ github.event.repository.name}}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
-            delete_remote_files: 1  sftp:
+            delete_remote_files: 1
   test:
     name: Integrated test with Docker
     needs: [phar]
@@ -131,4 +131,4 @@ jobs:
 
           wget -O plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
           docker cp plugins/ ${{ github.event.repository.name}}-pocketmine:/plugins;
-          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php;
+          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php
