@@ -95,7 +95,7 @@ jobs:
           name: ${{ github.event.repository.name}}
       - uses: montudor/action-zip@v1
         with:
-          args: unzip -qq ${{ github.event.repository.name}}.zip
+          args: unzip -qq ${{ github.event.repository.name}}
       - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
             username: ${{ secrets.FTP_USERNAME }}
@@ -122,7 +122,7 @@ jobs:
           name: ${{ github.event.repository.name}}
       - uses: montudor/action-zip@v1
         with:
-          args: unzip -qq ${{ github.event.repository.name}}.zip -d plugins
+          args: unzip -qq ${{ github.event.repository.name}} -d plugins
       - name: Docker create and run
         run: >
           docker rm ${{ github.event.repository.name }}-pocketmine || true;
