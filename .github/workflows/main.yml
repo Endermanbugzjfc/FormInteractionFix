@@ -123,15 +123,12 @@ jobs:
           args: unzip -qq ${{ github.event.repository.name}}.zip -d plugins
       - name: Docker create and run
         run: >
-          docker rm ${{ github.event.repository.name }}-pocketmine || true
+          docker rm ${{ github.event.repository.name }}-pocketmine || true;
           docker create --name ${{ github.event.repository.name }}-pocketmine
           -u root
           pmmp/pocketmine-mp:${{ matrix.pm }}
-          start-pocketmine --debug.level=2
-          bash -c 'chown -R 1000:1000 /data /plugins && su - pocketmine bash -c "start-pocketmine --debug.level=2"'
+          start-pocketmine --debug.level=2;
 
-          wget -O plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802
-
-          docker cp plugins/ ${{ github.event.repository.name}}-pocketmine:/plugins
-
-          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php
+          wget -O plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
+          docker cp plugins/ ${{ github.event.repository.name}}-pocketmine:/plugins;
+          docker cp IntegratedTest.php ${{ github.event.repository.name}}-pocketmine:/plugins/IntegratedTest.php;
