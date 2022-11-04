@@ -42,7 +42,7 @@ class PlayerSession {
 	 */
 	public function packetSendIterator() : Generator {
 		while (true) { // @phpstan-ignore-line
-			$event = yield $this->std->awaitEvent(
+			$event = yield from $this->std->awaitEvent(
 				DataPacketSendEvent::class,
 				fn($event) => in_array($this->player->getNetworkSession(), $event->getTargets(), true),
 				false,
@@ -63,7 +63,7 @@ class PlayerSession {
 	 */
 	public function packetReceiveIterator() : Generator {
 		while (true) { // @phpstan-ignore-line
-			$event = yield $this->std->awaitEvent(
+			$event = yield from $this->std->awaitEvent(
 				DataPacketReceiveEvent::class,
 				fn($event) => $this->player->getNetworkSession() === $event->getOrigin(),
 				false,
