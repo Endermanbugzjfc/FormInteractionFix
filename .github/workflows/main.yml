@@ -117,7 +117,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
-        name: ${{ github.event.repository.name}}
+          name: ${{ github.event.repository.name}}
       - uses: montudor/action-zip@v1
         with:
           args: unzip -qq ${{ github.event.repository.name}}.zip -d plugins
