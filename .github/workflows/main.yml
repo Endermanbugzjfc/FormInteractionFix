@@ -99,15 +99,15 @@ jobs:
             username: ${{ secrets.FTP_USERNAME }}
             server: ${{ secrets.FTP_SERVER }}
             port: ${{ secrets.FTP_PORT }}
-            local_path: '~/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar'
+            local_path: '${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar'
             remote_path: 'plugins/${{ github.event.repository.name }}.phar'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             delete_remote_files: 1
       - if: failure()
         run: |
-          tree ~/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}
-          stat ~/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar
+          tree ${{ github.event.repository.name }}/${{ github.event.repository.name }}
+          stat ${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.phar
 
   test:
     name: Integrated test with Docker
