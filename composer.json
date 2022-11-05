@@ -13,7 +13,7 @@
             "composer build"
         ],
         "deps": [
-            "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/v.dl/SOF3/await-generator/await-generator/^3.4.2",
+            "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/r/196687/await-generator_pr-60.phar",
             "[ -f hack/await-std.phar ] || wget -O hack/await-std.phar https://poggit.pmmp.io/v.dl/SOF3/await-std/await-std/^0.2.0"
         ],
         "fmt": [
