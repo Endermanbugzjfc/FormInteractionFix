@@ -85,7 +85,7 @@ class PlayerSession {
 			// Filter out other that are useless to this plugin.
 			do {
 				$sent = null;
-				yield from $send->next($sent);
+				yield $send->next($sent);
 			} while (match (true) {
 				$sent instanceof ModalFormRequestPacket => false,
 				default => true,
@@ -93,7 +93,7 @@ class PlayerSession {
 
 			do {
 				$received = null;
-				[, $race] = yield from Await::race([
+				[, $race] = yield Await::race([
 					$this->std->awaitEvent(
 						PlayerInteractEvent::class,
 						fn($event) => $event->getPlayer() === $this->player,
