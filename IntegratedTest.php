@@ -17,10 +17,12 @@ use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\form\Form;
 use pocketmine\item\VanillaItems;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use RuntimeException;
+use function mt_rand;
 
 /**
  * @name FormInteractionFix_IntegratedTest
@@ -145,10 +147,17 @@ class IntegratedTest extends PluginBase implements Listener {
 			throw new RuntimeException("Network Session of " . $this->spammer->getName() . " is not under FakePlayer");
 		}
 
-		$response = new DataPacketReceiveEvent($session, ModalFormResponsePacket::cancel(
+		// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
+		$cancelParams = [
 			$this->formIdCounter++,
 			ModalFormResponsePacket::CANCEL_REASON_CLOSED
-		));
+		];
+		$currentProtocol = ProtocolInfo::CURRENT_PROTOCOL;
+		$currentProtocol = mt_rand($currentProtocol, $currentProtocol); // Blame PHPStan.
+		$response = new DataPacketReceiveEvent($session, $currentProtocol < 544
+			? ModalFormResponsePacket::cancel(...$cancelParams)
+			: ModalFormResponsePacket::create($cancelParams[0], "", $cancelParams[1]) // @phpstan-ignore-line Call to private static method create() of class pocketmine\network\mcpe\protocol\ModalFormResponsePacket.
+		);
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $response->call()), 20);
 
 		$this->sent = true;
