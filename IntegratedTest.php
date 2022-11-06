@@ -45,6 +45,8 @@ use function mt_rand;
  * 10. Kick the spammer.
  * 11. Await 1 second.
  * 12. Signal server to shutdown.
+ * 
+ * Caution before read: This class is a mess because of the absence of await-generator and the need to support multiple protocol versions.
  */
 class IntegratedTest extends PluginBase implements Listener {
 	protected function onEnable() : void {
@@ -108,20 +110,8 @@ class IntegratedTest extends PluginBase implements Listener {
 		}
 
 		// Script plugin cannot load virion so I have to write form in JSON. :/
-		$event->getPlayer()->sendForm(new class(function () : void {
-			$this->sent = false;
-			if ($this->sentCount === 1) {
-				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
-					if ($this->sentCount !== 2) {
-						throw new RuntimeException("Form should open twice but got $this->sentCount times");
-					}
-					$this->spammer->kick();
-
-					$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 20);
-				}), 20);
-			}
-		}, $this->getLogger()) implements Form {
-			public function __construct(private Closure $close, private Logger $log) {
+		$event->getPlayer()->sendForm(new class() implements Form {
+			public function __construct() {
 			}
 
 			/**
@@ -137,8 +127,6 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 
 			public function handleResponse(Player $_, $__) : void {
-				$this->log->notice("Closing form");
-				($this->close)();
 			}
 		});
 
@@ -149,17 +137,26 @@ class IntegratedTest extends PluginBase implements Listener {
 		}
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($session) : void {
 			// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
-			$cancelParams = [
-				$formIdCount = $this->formIdCounter++,
-				ModalFormResponsePacket::CANCEL_REASON_CLOSED
-			];
+			$formIdCount = $this->formIdCounter++;
 			$currentProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 			$currentProtocol = mt_rand($currentProtocol, $currentProtocol); // Blame PHPStan.
 			$response = new DataPacketReceiveEvent($session, $currentProtocol >= 544
-				? ModalFormResponsePacket::cancel(...$cancelParams)
+				? ModalFormResponsePacket::cancel($formIdCount, ModalFormResponsePacket::CANCEL_REASON_CLOSED)
 				: ModalFormResponsePacket::create($formIdCount, "null") // @phpstan-ignore-line Call to private static method create() of class pocketmine\network\mcpe\protocol\ModalFormResponsePacket.
 			);
 
+			$this->sent = false;
+			if ($this->sentCount === 1) {
+				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
+					if ($this->sentCount !== 2) {
+						throw new RuntimeException("Form should open twice but got $this->sentCount times");
+					}
+					$this->spammer->kick();
+
+					$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 20);
+				}), 20);
+			}
+		
 			$this->getLogger()->notice("Closing form $formIdCount");
 			$response->call();
 		}), 20);
