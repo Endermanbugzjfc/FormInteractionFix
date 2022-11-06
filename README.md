@@ -13,7 +13,10 @@ NPC dialogues will be supported soon™.
 By listening for packets and cancel interaction events after it is sent to the player.
 Until the player closes the form.
 
-# Compatibility
+# Potential problems
+This plugin relies on packets very much. And can malfunction if a client does not respond with the correct packet. For instance, official clients would not open a form that the JSON of its packet is invalid. Eventually, the client can neither react to any form nor to make any interaction.
+
+# Inclusiveness
 As this plugin is driven by packets, it works globally on the server.
 Existing plugins that have no interaction cooldown will acquire the protection.
 Future plugins can also choose to depend on this plugin instead of verbosely implementing an interaction cool down on their own.
