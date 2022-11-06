@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e4e43f25ba670888eff7f105c8250554",
+    "content-hash": "0cd2a19e833454ddacbff2a8d5fe37ff",
     "packages": [],
     "packages-dev": [
         {
@@ -652,6 +652,21 @@
                 }
             ],
             "time": "2022-10-12T14:20:51+00:00"
+        },
+        {
+            "name": "muqsit/fakeplayer",
+            "version": "master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Muqsit/FakePlayer",
+                "reference": "master"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            }
         },
         {
             "name": "netresearch/jsonmapper",
@@ -3400,7 +3415,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "sof3/await-std": 20
+        "sof3/await-std": 20,
+        "muqsit/fakeplayer": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

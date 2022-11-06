@@ -4,8 +4,24 @@
         "sof3/await-generator": "^3.4",
         "sof3/await-std": "dev-master",
         "phpstan/phpstan": "^1.8",
-        "friendsofphp/php-cs-fixer": "^3.12"
+        "friendsofphp/php-cs-fixer": "^3.12",
+        "muqsit/fakeplayer": "dev-master"
     },
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "name": "muqsit/fakeplayer",
+            "version": "master",
+            "autoload": {
+                "classmap": ["src/"]
+            },
+            "source": {
+                "url": "https://github.com/Muqsit/FakePlayer",
+                "type": "git",
+                "reference": "master"
+            }
+        }
+    }],
     "scripts": {
         "all": [
             "composer fmt",

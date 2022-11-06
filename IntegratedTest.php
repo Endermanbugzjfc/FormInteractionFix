@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace Endermanbugzjfc\FormInteractionFix_IntegratedTest;
 
 use Closure;
-use RuntimeException;
+use Logger;
+use muqsit\fakeplayer\network\FakePlayerNetworkSession;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\form\Form;
 use pocketmine\item\VanillaItems;
+use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
+use RuntimeException;
 
 /**
  * @name FormInteractionFix_IntegratedTest
@@ -50,12 +54,16 @@ class IntegratedTest extends PluginBase implements Listener {
 
 	private Player $spammer;
 
+	private int $formIdCounter = 0;
+
 	/**
 	 * @priority MONITOR
 	 */
 	public function interactEveryTickWhenPlayerJoin(PlayerJoinEvent $event) : void {
 		if ($event->getPlayer()->getName() === "BlahCoast30765") {
-			$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($event) : void { $event->getPlayer()->kick(); }), 1); // Cancelling PlayerLoginEvent crashes FakePlayer...
+			$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($event) : void {
+				$event->getPlayer()->kick();
+			}), 1); // Cancelling PlayerLoginEvent crashes FakePlayer...
 			return;
 		}
 
@@ -92,13 +100,18 @@ class IntegratedTest extends PluginBase implements Listener {
 			throw new RuntimeException("Form interaction fix failed");
 		}
 
+		if ($this->sentCount >= 2) {
+			$this->getLogger()->info("Not opening form because sent count $this->sentCount >= 2");
+			return;
+		}
+
 		// Script plugin cannot load virion so I have to write form in JSON. :/
 		$event->getPlayer()->sendForm(new class(function () : void {
 			$this->sent = false;
 			if ($this->sentCount === 1) {
 				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
 					if ($this->sentCount !== 2) {
-						throw new \RuntimeException("Form should open twice but got $this->sentCount times");
+						throw new RuntimeException("Form should open twice but got $this->sentCount times");
 					}
 					$this->spammer->kick();
 
@@ -106,7 +119,7 @@ class IntegratedTest extends PluginBase implements Listener {
 				}), 20);
 			}
 		}, $this->getLogger()) implements Form {
-			public function __construct(private Closure $close, private \Logger $log) {
+			public function __construct(private Closure $close, private Logger $log) {
 			}
 
 			/**
@@ -127,7 +140,16 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 		});
 
-		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->controlSpammer("form button 0")), 20);
+		$session = $this->spammer->getNetworkSession();
+		if (!$session instanceof FakePlayerNetworkSession) {
+			throw new RuntimeException("Network Session of " . $this->spammer->getName() . " is not under FakePlayer");
+		}
+
+		$response = new DataPacketReceiveEvent($session, ModalFormResponsePacket::cancel(
+			$this->formIdCounter++,
+			ModalFormResponsePacket::CANCEL_REASON_CLOSED
+		));
+		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $response->call()), 20);
 
 		$this->sent = true;
 		$this->sentCount++;
