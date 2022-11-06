@@ -102,7 +102,7 @@ class IntegratedTest extends PluginBase implements Listener {
 					}
 					$this->spammer->kick();
 
-					$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()));
+					$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 20);
 				}), 20);
 			}
 		}, $this->getLogger()) implements Form {
