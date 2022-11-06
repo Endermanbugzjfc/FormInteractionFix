@@ -59,6 +59,7 @@ class IntegratedTest extends PluginBase implements Listener {
 	public function interactEveryTickWhenPlayerJoin(PlayerJoinEvent $event) : void {
 		if ($event->getPlayer()->getName() === "BlahCoast30765") {
 			$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($event) : void { $event->getPlayer()->kick(); }), 1); // Cancelling PlayerLoginEvent crashes FakePlayer...
+			return;
 		}
 
 		if (isset($this->spammer)) {
