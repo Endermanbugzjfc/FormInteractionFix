@@ -14,7 +14,7 @@
         ],
         "deps": [
             "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/r/196694/await-generator_pr-61.phar",
-            "[ -f hack/await-std.phar ] || wget -O hack/await-std.phar https://poggit.pmmp.io/v.dl/SOF3/await-std/await-std/^0.2.0"
+            "[ -f hack/await-std.phar ] || wget -O hack/await-std.phar https://poggit.pmmp.io/r/196725/await-std_pr-13.phar"
         ],
         "fmt": [
             "php-cs-fixer fix"
