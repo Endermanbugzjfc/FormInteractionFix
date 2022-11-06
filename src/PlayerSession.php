@@ -98,7 +98,6 @@ class PlayerSession {
 						default => true, // Filter out other that are useless to this plugin.
 					});
 
-			var_dump("b");
 					$closed = true;
 				} catch (DisposeException) {
 				}
@@ -116,7 +115,6 @@ class PlayerSession {
 					$this->player
 				);
 			} while (!$closed);
-			var_dump("a");
 		}
 	}
 }
