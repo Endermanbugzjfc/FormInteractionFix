@@ -40,7 +40,7 @@ use pocketmine\scheduler\ClosureTask;
 class IntegratedTest extends PluginBase implements Listener {
 	protected function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$timeout = 15 * 20;
+		$timeout = 20 * 20;
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => throw new RuntimeException("Timeout: $timeout ticks")), $timeout);
 		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->sudo("status")), 5 * 20);
 	}
