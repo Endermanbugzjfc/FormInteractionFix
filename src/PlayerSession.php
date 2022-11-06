@@ -92,7 +92,7 @@ class PlayerSession {
 			});
 
 			$closed = false;
-			Await::f2c(function () use (&$closed) : \Generator {
+			Await::f2c(function () use ($receive, &$closed) : \Generator {
 				do {
 					$received = null;
 					yield from $receive->next($received);
