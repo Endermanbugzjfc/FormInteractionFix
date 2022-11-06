@@ -147,7 +147,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			throw new RuntimeException("Network Session of " . $this->spammer->getName() . " is not under FakePlayer");
 
 		}
-		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
+		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($session) : void {
 			// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
 			$cancelParams = [
 				$formIdCount = $this->formIdCounter++,
