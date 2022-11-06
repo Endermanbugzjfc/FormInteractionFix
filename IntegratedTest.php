@@ -154,7 +154,7 @@ class IntegratedTest extends PluginBase implements Listener {
 		];
 		$currentProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 		$currentProtocol = mt_rand($currentProtocol, $currentProtocol); // Blame PHPStan.
-		$response = new DataPacketReceiveEvent($session, $currentProtocol < 544
+		$response = new DataPacketReceiveEvent($session, $currentProtocol >= 544
 			? ModalFormResponsePacket::cancel(...$cancelParams)
 			: ModalFormResponsePacket::create($formIdCount, "null") // @phpstan-ignore-line Call to private static method create() of class pocketmine\network\mcpe\protocol\ModalFormResponsePacket.
 		);
