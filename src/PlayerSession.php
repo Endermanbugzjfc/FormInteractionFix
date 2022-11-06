@@ -91,28 +91,31 @@ class PlayerSession {
 				default => true,
 			});
 
-			do {
-				$received = null;
-				[, $race] = yield from Await::race([
-					$this->std->awaitEvent(
-						PlayerInteractEvent::class,
-						fn($event) => $event->getPlayer() === $this->player,
-						false,
-						EventPriority::LOW, // One level below NORMAL.
-						false,
-						$this->player
-					),
-					$receive->next($received)
-				]);
+			$closed = false;
+			Await::f2c(function () use (&$closed) : \Generator {
+				do {
+					$received = null;
+					yield from $receive->next($received);
+				} while (match (true) {
+					$received instanceof ModalFormRequestPacket => false,
+					default => true,
+				});
 
-				if ($race instanceof PlayerInteractEvent) {
-					$race->cancel();
-					continue;
-				}
-			} while (match (true) {
-				$sent instanceof ModalFormRequestPacket => !$received instanceof ModalFormResponsePacket,
-				default => true,
+				$closed = true;
 			});
+
+			$event = null;
+			do {
+				$event?->cancel();
+				$event = yield from $this->std->awaitEvent(
+					PlayerInteractEvent::class,
+					fn($event) => $event->getPlayer() === $this->player,
+					false,
+					EventPriority::LOW, // One level below NORMAL.
+					false,
+					$this->player
+				);
+			} while (!$closed);
 		}
 	}
 }
