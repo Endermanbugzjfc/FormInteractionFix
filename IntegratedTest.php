@@ -26,23 +26,24 @@ use pocketmine\scheduler\ClosureTask;
  * @main Endermanbugzjfc\FormInteractionFix_IntegratedTest\IntegratedTest
  * @depend FormInteractionFix
  *
+ * 0. Kick BlahCoast30765 after 1 tick.
  * 1. Run /fakeplayer $name interact every tick.
  * 2. Sends a menu form with exactly one button on first interaction.
  * 3. FormInteractionFix should block other interactions after the form opens.
- * 4. Await 5 seconds.
+ * 4. Await 1 second.
  * 5. Run /fakeplayer $name form button 0.
  * 6. FormInteractionFix unblock interactions after the form closes.
  * 7. The form should open again.
- * 7. Await 5 seconds.
+ * 7. Await 1 second.
  * 8. Signal server to shutdown.
  * 9. Check if the form has opened exactly twice.
  */
 class IntegratedTest extends PluginBase implements Listener {
 	protected function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$timeout = 20 * 20;
+		$timeout = 15 * 20;
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => throw new RuntimeException("Timeout: $timeout ticks")), $timeout);
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->sudo("status")), 5 * 20);
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->sudo("status")), 3 * 20);
 	}
 
 	protected function onDisable() : void {
@@ -76,7 +77,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 		}
 
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 2);
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 1);
 	}
 
 	private bool $sent = false;
@@ -99,7 +100,7 @@ class IntegratedTest extends PluginBase implements Listener {
 		$event->getPlayer()->sendForm(new class(function () : void {
 			$this->sent = false;
 			if ($this->sentCount === 1) {
-				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 5 * 20);
+				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 20);
 			}
 		}, $this->getLogger()) implements Form {
 			public function __construct(private Closure $close, private \Logger $log) {
@@ -123,7 +124,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 		});
 
-		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->controlSpammer("form button 0")), 5 * 20);
+		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->controlSpammer("form button 0")), 20);
 
 		$this->sent = true;
 		$this->sentCount++;
