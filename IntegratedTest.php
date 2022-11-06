@@ -94,6 +94,7 @@ class IntegratedTest extends PluginBase implements Listener {
 		if ($this->sent) {
 			throw new RuntimeException("Form interaction fix failed");
 		}
+		$this->getLogger()->notice("Opening form for the $this->sentCount time");
 
 		// Script plugin cannot load virion so I have to write form in JSON. :/
 		$event->getPlayer()->sendForm(new class(function () : void {
