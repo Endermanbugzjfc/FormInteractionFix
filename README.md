@@ -8,13 +8,13 @@ You may notice that PlayerInteractEvent is called many times in a short period.
 If a plugin opens its form on interaction, these players will see the form opens more than once.
 
 # The fix
-This plugin applies interaction-spam protection on forms at the moment.
+This plugin enables interaction-spam protection on forms at the moment.
 NPC dialogues will be supported soon™.
-By listening for packets and cancel interaction events after it is sent to the player.
+By listening for packets and cancelling interaction events after a form is sent to the player.
 Until the player closes the form.
 
 # Potential problems
-This plugin relies on packets very much. And can malfunction if a client does not respond with the correct packet. For instance, official clients would not open a form that the JSON of its packet is invalid. Eventually, the client can neither react to any form nor to make any interaction.
+This plugin relies on packets very much. And can malfunction if a client does not respond with the correct packet. For instance, official clients would not open a form in that the JSON of its packet is invalid. Eventually, the client can neither react to any form nor make any interaction.
 
 # Inclusiveness
 As this plugin is driven by packets, it works globally on the server.
@@ -25,6 +25,6 @@ Future plugins can also choose to depend on this plugin instead of verbosely imp
 Although I kept mentioning "protection" above, this plugin can not prevent any malicious attacks or behaviours.
 
 # Developer note
-This plugin uses Await-Generator, a library that brings async/await features to PHP.
+This plugin uses Await-Generator, a library that brings async/awaits features to PHP.
 
-Do not be worry when you see unusual code like `while (true)` and `yield`. It will not block the thread. Instead, `yield` can pause the code flow and make it behaves like concurrency.
+Do not worry when you see unusual code like `while (true)` and `yield`. It will not block the thread. Instead, `yield` can pause the code flow and make it behaves like concurrency.

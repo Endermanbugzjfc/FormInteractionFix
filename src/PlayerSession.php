@@ -79,14 +79,12 @@ class PlayerSession {
 		$receive = new Traverser($this->packetReceiveIterator());
 
 		while (true) { // @phpstan-ignore-line
-			// Await receive either one of the packet below.
-			// Filter out other that are useless to this plugin.
 			do {
 				$sent = null;
 				yield from $send->next($sent);
 			} while (match (true) {
 				$sent instanceof ModalFormRequestPacket => false,
-				default => true,
+				default => true, // Filter out other that are useless to this plugin.
 			});
 
 			$closed = false;
@@ -97,7 +95,7 @@ class PlayerSession {
 						yield from $receive->next($received);
 					} while (match (true) {
 						$received instanceof ModalFormRequestPacket => false,
-						default => true,
+						default => true, // Filter out other that are useless to this plugin.
 					});
 
 					$closed = true;
