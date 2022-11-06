@@ -76,7 +76,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 		}
 
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 1);
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 2);
 	}
 
 	private bool $sent = false;
