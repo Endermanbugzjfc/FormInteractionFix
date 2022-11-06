@@ -31,7 +31,7 @@ use RuntimeException;
  * @depend FormInteractionFix
  *
  * 0.  Kick BlahCoast30765 after 1 tick.
- * 1.  Run /fakeplayer $name interact every tick.
+ * 1.  Run /fakeplayer $name interact every 2 ticks.
  * 2.  Sends a menu form with exactly one button on first interaction.
  * 3.  FormInteractionFix should block other interactions after the form opens.
  * 4.  Await 1 second.
@@ -81,7 +81,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 		}
 
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 1);
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->controlSpammer("interact")), 2);
 	}
 
 	private bool $sent = false;
