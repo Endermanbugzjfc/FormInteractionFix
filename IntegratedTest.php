@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Endermanbugzjfc\FormInteractionFix_IntegratedTest;
 
 use Closure;
+use RuntimeException;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\form\Form;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
-use RuntimeException;
 
 /**
  * @name FormInteractionFix_IntegratedTest
@@ -41,6 +42,7 @@ class IntegratedTest extends PluginBase implements Listener {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		$timeout = 15 * 20;
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => throw new RuntimeException("Timeout: $timeout ticks")), $timeout);
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => $this->sudo("status")), 5 * 20);
 	}
 
 	protected function onDisable() : void {
@@ -50,6 +52,12 @@ class IntegratedTest extends PluginBase implements Listener {
 	}
 
 	private Player $spammer;
+
+	public function kickBlahCoast30765(PlayerLoginEvent $event) : void {
+		if ($event->getPlayer()->getName() === "BlahCoast30765") {
+			$event->cancel();
+		}
+	}
 
 	/**
 	 * @priority MONITOR
@@ -123,9 +131,14 @@ class IntegratedTest extends PluginBase implements Listener {
 	}
 
 	private function controlSpammer(string $subCommand) : void {
+		$this->sudo('fakeplayer "' . $this->spammer->getName() . '" ' . $subCommand);
+	}
+
+	private function sudo(string $cmd) : void {
+		$this->getLogger()->info("Sudo: $cmd");
+
 		$server = $this->getServer();
 		$consoleSender = new ConsoleCommandSender($server, $server->getLanguage());
-
-		$server->dispatchCommand($consoleSender, 'fakeplayer "' . $this->spammer->getName() . '" ' . $subCommand);
+		$this->getServer()->dispatchCommand($consoleSender, $cmd);
 	}
 }
