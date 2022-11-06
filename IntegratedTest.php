@@ -101,8 +101,8 @@ class IntegratedTest extends PluginBase implements Listener {
 			if ($this->sentCount === 1) {
 				$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 5 * 20);
 			}
-		}) implements Form {
-			public function __construct(private Closure $close) {
+		}, $this->getLogger()) implements Form {
+			public function __construct(private Closure $close, private \Logger $log) {
 			}
 
 			/**
@@ -118,6 +118,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 
 			public function handleResponse(Player $_, $__) : void {
+				$this->log->notice("Closing form");
 				($this->close)();
 			}
 		});
