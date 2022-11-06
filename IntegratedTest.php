@@ -145,20 +145,24 @@ class IntegratedTest extends PluginBase implements Listener {
 		$session = $this->spammer->getNetworkSession();
 		if (!$session instanceof FakePlayerNetworkSession) {
 			throw new RuntimeException("Network Session of " . $this->spammer->getName() . " is not under FakePlayer");
-		}
 
-		// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
-		$cancelParams = [
-			$formIdCount = $this->formIdCounter++,
-			ModalFormResponsePacket::CANCEL_REASON_CLOSED
-		];
-		$currentProtocol = ProtocolInfo::CURRENT_PROTOCOL;
-		$currentProtocol = mt_rand($currentProtocol, $currentProtocol); // Blame PHPStan.
-		$response = new DataPacketReceiveEvent($session, $currentProtocol >= 544
-			? ModalFormResponsePacket::cancel(...$cancelParams)
-			: ModalFormResponsePacket::create($formIdCount, "null") // @phpstan-ignore-line Call to private static method create() of class pocketmine\network\mcpe\protocol\ModalFormResponsePacket.
-		);
-		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $response->call()), 20);
+		}
+		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
+			// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
+			$cancelParams = [
+				$formIdCount = $this->formIdCounter++,
+				ModalFormResponsePacket::CANCEL_REASON_CLOSED
+			];
+			$currentProtocol = ProtocolInfo::CURRENT_PROTOCOL;
+			$currentProtocol = mt_rand($currentProtocol, $currentProtocol); // Blame PHPStan.
+			$response = new DataPacketReceiveEvent($session, $currentProtocol >= 544
+				? ModalFormResponsePacket::cancel(...$cancelParams)
+				: ModalFormResponsePacket::create($formIdCount, "null") // @phpstan-ignore-line Call to private static method create() of class pocketmine\network\mcpe\protocol\ModalFormResponsePacket.
+			);
+
+			$this->getLogger()->notice("Closing form $formIdCount");
+			$response->call();
+		}), 20);
 
 		$this->sent = true;
 		$this->sentCount++;
