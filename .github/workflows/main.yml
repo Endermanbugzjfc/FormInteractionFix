@@ -85,35 +85,40 @@ jobs:
           retention-days: 1 # default 90.
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  sftp:
-    name: Sync PHAR to a private server
-    needs: [phar]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: ${{ github.event.repository.name }}
-          path: ./download
-      - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-            username: ${{ secrets.FTP_USERNAME }}
-            server: ${{ secrets.FTP_SERVER }}
-            port: ${{ secrets.FTP_PORT }}
-            local_path: './download/${{ github.event.repository.name }}.phar'
-            remote_path: 'plugins/${{ github.event.repository.name }}.phar'
-            sftp_only: true
-            password: ${{ secrets.FTP_PASSWORD }}
-            delete_remote_files: 1
-      - if: failure()
-        run: |
-          tree ./download
-          stat ./download/${{ github.event.repository.name }}.phar
+  # SEC VUL!
+
+  # sftp:
+  #   name: Sync PHAR to a private server
+  #   needs: [phar]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: ${{ github.event.repository.name }}
+  #         path: ./download
+  #     - uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+  #       with:
+  #           username: ${{ secrets.FTP_USERNAME }}
+  #           server: ${{ secrets.FTP_SERVER }}
+  #           port: ${{ secrets.FTP_PORT }}
+  #           local_path: './download/${{ github.event.repository.name }}.phar'
+  #           remote_path: 'plugins/${{ github.event.repository.name }}.phar'
+  #           sftp_only: true
+  #           password: ${{ secrets.FTP_PASSWORD }}
+  #           delete_remote_files: 1
+  #     - if: failure()
+  #       run: |
+  #         tree ./download
+  #         stat ./download/${{ github.event.repository.name }}.phar
+
+  # SEC VUL!
 
   test:
     name: Integrated test with Docker
     needs: [phar]
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     strategy:
       matrix:
         pm: [4, 4.0.0]
@@ -137,6 +142,5 @@ jobs:
           docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
-          sleep 30 && docker kill test &> /dev/null;
           docker start -ia ${{ matrix.container-prefix }}-pocketmine;
 # https://discord.com/channels/373199722573201408/480650036972224513/1038057748170035260
