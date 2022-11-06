@@ -138,7 +138,7 @@ jobs:
           pmmp/pocketmine-mp:${{ matrix.pm }}
           start-pocketmine --debug.level=2 --auto-report.enabled=0;
 
-          wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/146802;
+          wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/181430/FakePlayer_dev-59.phar;
           docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
