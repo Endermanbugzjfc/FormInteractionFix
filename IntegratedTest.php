@@ -127,6 +127,7 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 
 			public function handleResponse(Player $_, $__) : void {
+				throw new \AssertionError("unreachable");
 			}
 		});
 
