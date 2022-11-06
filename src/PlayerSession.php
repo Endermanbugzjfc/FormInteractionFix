@@ -11,7 +11,6 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
-use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\player\Player;
 use SOFe\AwaitGenerator\Await;
 use SOFe\AwaitGenerator\Traverser;
@@ -27,11 +26,10 @@ class PlayerSession {
 	) {
 		unset($_); // Blame PHPStan.
 
-		Await::f2c(function () : \Generator {
+		Await::f2c(function () : Generator {
 			try {
 				yield from $this->mainLoop();
 			} catch (DisposeException) {
-
 			}
 		});
 	}
@@ -92,16 +90,19 @@ class PlayerSession {
 			});
 
 			$closed = false;
-			Await::f2c(function () use ($receive, &$closed) : \Generator {
-				do {
-					$received = null;
-					yield from $receive->next($received);
-				} while (match (true) {
-					$received instanceof ModalFormRequestPacket => false,
-					default => true,
-				});
+			Await::f2c(function () use ($receive, &$closed) : Generator {
+				try {
+					do {
+						$received = null;
+						yield from $receive->next($received);
+					} while (match (true) {
+						$received instanceof ModalFormRequestPacket => false,
+						default => true,
+					});
 
-				$closed = true;
+					$closed = true;
+				} catch (DisposeException) {
+				}
 			});
 
 			$event = null;
