@@ -48,7 +48,7 @@ class IntegratedTest extends PluginBase implements Listener {
 
 	protected function onDisable() : void {
 		$this->getLogger()->critical("Form should open twice but got $this->sentCount times");
-		exit 1;
+		exit(1);
 	}
 
 	private Player $spammer;
