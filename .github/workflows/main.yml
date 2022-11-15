@@ -67,12 +67,34 @@ jobs:
           mv src "${{ github.repository }}"
           mkdir src
           mv "${{ github.repository_owner }}" src
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
       - name: Push to Poggit branch
+        uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         if: github.event_name == 'release'
-        run: |
-          git checkout poggit
-          git commit -a -m "version: ${{ github.sha }}"
-          git push
+        with:
+          # Additional arguments for the git commit command. The --message argument is already set by the message input.
+          # Default: ''
+          commit: -s # GPG-signoff.
+
+          # The message for the commit.
+          # Default: 'Commit from GitHub Actions (name of the workflow)'
+          message: "version: ${{ github.sha }}"
+
+          # If this input is set, the action will push the commit to a new branch with this name.
+          # Default: ''
+          new_branch: poggit
+
+          # The way the action should handle pathspec errors from the add and remove commands. Three options are available:
+          # - ignore -> errors will be logged but the step won't fail
+          # - exitImmediately -> the action will stop right away, and the step will fail
+          # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
+          # Default: ignore
+          pathspec_error_handling: exitAtEnd
       - uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
         with:
           php-version: ${{ matrix.php }}
