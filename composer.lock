@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0cd2a19e833454ddacbff2a8d5fe37ff",
+    "content-hash": "40432bb173ef41943edd3f0e04396e2a",
     "packages": [],
     "packages-dev": [
         {
@@ -1922,16 +1922,16 @@
         },
         {
             "name": "sof3/await-generator",
-            "version": "3.4.2",
+            "version": "3.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SOF3/await-generator.git",
-                "reference": "05f14d8d5122edb2e0e4058770f7f36756062b9c"
+                "reference": "89d67144a12b856f912d36fa4bf0a513236c68c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SOF3/await-generator/zipball/05f14d8d5122edb2e0e4058770f7f36756062b9c",
-                "reference": "05f14d8d5122edb2e0e4058770f7f36756062b9c",
+                "url": "https://api.github.com/repos/SOF3/await-generator/zipball/89d67144a12b856f912d36fa4bf0a513236c68c6",
+                "reference": "89d67144a12b856f912d36fa4bf0a513236c68c6",
                 "shasum": ""
             },
             "require": {
@@ -1962,9 +1962,9 @@
             "description": "Use async/await in PHP using generators",
             "support": {
                 "issues": "https://github.com/SOF3/await-generator/issues",
-                "source": "https://github.com/SOF3/await-generator/tree/3.4.2"
+                "source": "https://github.com/SOF3/await-generator/tree/3.4.3"
             },
-            "time": "2022-06-12T03:06:57+00:00"
+            "time": "2022-11-14T15:00:42+00:00"
         },
         {
             "name": "sof3/await-std",

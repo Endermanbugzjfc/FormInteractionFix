@@ -6,11 +6,6 @@ namespace Endermanbugzjfc\FormInteractionFix;
 
 use Generator;
 use Logger;
-use SOFe\AwaitGenerator\Await;
-use SOFe\AwaitGenerator\Traverser;
-use SOFe\AwaitStd\AwaitStd;
-use SOFe\AwaitStd\DisposeException;
-use function in_array;
 use pocketmine\event\EventPriority;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -18,6 +13,11 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\player\Player;
+use SOFe\AwaitGenerator\Await;
+use SOFe\AwaitGenerator\Traverser;
+use SOFe\AwaitStd\AwaitStd;
+use SOFe\AwaitStd\DisposeException;
+use function in_array;
 
 class PlayerSession {
 	public function __construct(

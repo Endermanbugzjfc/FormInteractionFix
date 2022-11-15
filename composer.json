@@ -1,7 +1,7 @@
 {
     "require-dev": {
         "pocketmine/pocketmine-mp": "^4",
-        "sof3/await-generator": "^3.4",
+        "sof3/await-generator": "^3.4.3",
         "sof3/await-std": "dev-master",
         "phpstan/phpstan": "^1.8",
         "friendsofphp/php-cs-fixer": "^3.12",
@@ -29,7 +29,7 @@
             "composer build"
         ],
         "deps": [
-            "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/r/196694/await-generator_pr-61.phar",
+            "[ -f hack/await-generator.phar ] || wget -O hack/await-generator.phar https://poggit.pmmp.io/v.dl/SOF3/await-generator/await-generator/^3.4.3",
             "[ -f hack/await-std.phar ] || wget -O hack/await-std.phar https://poggit.pmmp.io/v.dl/SOF3/await-std/await-std/^0.2.0"
         ],
         "fmt": [

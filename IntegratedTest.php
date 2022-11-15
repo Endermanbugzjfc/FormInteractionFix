@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Endermanbugzjfc\FormInteractionFix_IntegratedTest;
 
-use Closure;
-use Logger;
+use AssertionError;
 use muqsit\fakeplayer\network\FakePlayerNetworkSession;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\console\ConsoleCommandSender;
@@ -45,7 +44,7 @@ use function mt_rand;
  * 10. Kick the spammer.
  * 11. Await 1 second.
  * 12. Signal server to shutdown.
- * 
+ *
  * Caution before read: This class is a mess because of the absence of await-generator and the need to support multiple protocol versions.
  */
 class IntegratedTest extends PluginBase implements Listener {
@@ -127,14 +126,13 @@ class IntegratedTest extends PluginBase implements Listener {
 			}
 
 			public function handleResponse(Player $_, $__) : void {
-				throw new \AssertionError("unreachable");
+				throw new AssertionError("unreachable");
 			}
 		});
 
 		$session = $this->spammer->getNetworkSession();
 		if (!$session instanceof FakePlayerNetworkSession) {
 			throw new RuntimeException("Network Session of " . $this->spammer->getName() . " is not under FakePlayer");
-
 		}
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($session) : void {
 			// https://github.com/pmmp/BedrockProtocol/commit/c2778039544fa0c7c5bd3af7963149e7552f4215#diff-f314d4f2858bb33c6ee1be30031ed2a3598ed87fd041d34e9321aea68bb0b1e5
@@ -157,7 +155,7 @@ class IntegratedTest extends PluginBase implements Listener {
 					$this->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => $this->getServer()->shutdown()), 20);
 				}), 20);
 			}
-		
+
 			$this->getLogger()->notice("Closing form $formIdCount");
 			$response->call();
 		}), 20);
