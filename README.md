@@ -33,7 +33,7 @@ Your plugin can depend on this plugin instead of verbosely implementing an inter
 
 ## await-generator & await-std
 Both were made by [@SOF3](https://github.com/SOF3):
-- [await-generator](https://github.com/SOF3/await-generator):  brings async/awaits to PHP. (Version ^3.4.3 is required as Traverser was [malfunctioning](https://github.com/SOF3/await-generator/pull/184) before.)
+- [await-generator](https://github.com/SOF3/await-generator):  brings async/awaits to PHP. (Version ^3.4.3 is required because it fixes the [Traverser error.](https://github.com/SOF3/await-generator/pull/184))
 - [await-std](https://github.com/SOF3/await-std): enables the use of PM API in async/await style, such as tasks and events.
 
 Do not worry when you see unusual code like `while (true)` and `yield`. It will not block the thread. Instead, `yield` can pause the code flow and make it behaves like concurrency.
