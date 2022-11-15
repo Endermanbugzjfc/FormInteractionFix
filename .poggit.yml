@@ -10,4 +10,5 @@ projects:
         version: ^3.4.3
       - src: sof3/await-std/await-std
         version: ^0.2.0
+    icon: asset/icon.jpeg
 ...
