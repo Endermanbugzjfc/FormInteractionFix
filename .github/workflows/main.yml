@@ -67,6 +67,12 @@ jobs:
           mv src "${{ github.repository }}"
           mkdir src
           mv "${{ github.repository_owner }}" src
+      - name: Push to Poggit branch
+        if: github.event_name == 'release'
+        run: |
+          git checkout poggit
+          git commit -a -m "version: ${{ github.sha }}"
+          git push
       - uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
         with:
           php-version: ${{ matrix.php }}
