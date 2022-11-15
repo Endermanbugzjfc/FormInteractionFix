@@ -1,5 +1,6 @@
 # <img src="https://github.com/Endermanbugzjfc/FormInteractionFix/blob/master/assets/icon.jpeg" width=75/ title="Credit: from windows93.net"> Form Interaction Fix
 [![CI](https://github.com/Endermanbugzjfc/FormInteractionFix/actions/workflows/main.yml/badge.svg)](https://github.com/Endermanbugzjfc/FormInteractionFix/actions/workflows/main.yml)
+[![Please click here to report a problem.](https://img.shields.io/github/issues-raw/Endermanbugzjfc/FormInteractionFix)](https://github.com/Endermanbugzjfc/FormInteractionFix/issues/new)
 # Interaction spam
 ## Explanation
 Interaction spam is often a problem for players who use the mouse as their input.
