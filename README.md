@@ -39,7 +39,7 @@ Both were made by [@SOF3](https://github.com/SOF3):
 Do not worry when you see unusual code like `while (true)` and `yield`. It will not block the thread. Instead, `yield` can pause the code flow and make it behaves like concurrency.
 
 ## IntegratedTest.php
-Performs integrated tests with [FakePlayer by Muqsit](https://github.com/muqsit/fakeplayer). Please refer to the [doc comments](https://github.com/Endermanbugzjfc/FormInteractionFix/blob/master/IntegratedTest.php#L34-L48) in it for more details.
+Performs integrated tests with [FakePlayer by Muqsit](https://github.com/muqsit/fakeplayer). Please refer to the [doc comments](https://github.com/Endermanbugzjfc/FormInteractionFix/blob/b38e413e1de56660c4a2ba99e2f1498258cae3ad/IntegratedTest.php#L34-L48) in it for more details.
 
 ## PHPStan & PHP-CS-Fixer
 Common PHP dev tools:
