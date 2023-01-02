@@ -64,7 +64,7 @@ jobs:
       - name: PSR-420
         run: |
           mkdir "${{ github.repository_owner }}"
-          mv src "${{ github.repository }}"
+          mv src "${{ github.repository }}" # This context contanis both owner and repo name. Example: Endermanbugzjfc/FormInteractionFix
           mkdir src
           mv "${{ github.repository_owner }}" src
       - name: Import GPG key
