@@ -10,20 +10,21 @@ on:
 jobs:
   build-php:
     name: Prepare PHP
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: [8.0.22]
+        php: [8.1]
     steps:
       - name: Build and prepare PHP cache
-        uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
+        uses: pmmp/setup-php-action@589cc43fddede20c8b0469828431d747fb1a1145
         with:
           php-version: ${{ matrix.php }}
           install-path: "../bin"
+          pm-version-major: 5
 
   typo:
     name: Typo Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: typos-action
@@ -47,10 +48,10 @@ jobs:
     permissions:
       contents: write
     needs: [build-php]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: [8.0.22]
+        php: [8.1]
     steps:
       - uses: actions/checkout@v3
       - name: Complete plugin manifest with release tag
@@ -95,10 +96,11 @@ jobs:
           # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
           # Default: ignore
           pathspec_error_handling: exitAtEnd
-      - uses: pmmp/setup-php-action@bc85364420d16fcf4986985fa67c9dd80c0b010b
+      - uses: pmmp/setup-php-action@589cc43fddede20c8b0469828431d747fb1a1145
         with:
           php-version: ${{ matrix.php }}
           install-path: "../bin"
+          pm-version-major: 5
       - name: Install Composer
         run: curl -sS https://getcomposer.org/installer | php
       - run: composer install
@@ -118,7 +120,7 @@ jobs:
   # sftp:
   #   name: Sync PHAR to a private server
   #   needs: [phar]
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-20.04
   #   steps:
   #     - uses: actions/checkout@v3
   #     - uses: actions/download-artifact@v3
@@ -145,7 +147,7 @@ jobs:
   test:
     name: Integrated test with Docker
     needs: [phar]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 1
     strategy:
       matrix:
