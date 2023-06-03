@@ -1,6 +1,6 @@
 name: FormInteractionFix
 author: Endermanbugzjfc
-api: 4.0.0
+api: [4.0.0, 5.0.0]
 main: Endermanbugzjfc\FormInteractionFix\Loader
 website: https://github.com/Endermanbugzjfc/FormInteractionFix
 
