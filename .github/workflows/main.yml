@@ -77,7 +77,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
       - name: Push to Poggit branch
         uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-        if: steps.import_gpg.outputs
+        if: ${{ success() }}
         with:
           # Additional arguments for the git commit command. The --message argument is already set by the message input.
           # Default: ''
