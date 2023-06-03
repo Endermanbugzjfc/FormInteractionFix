@@ -71,12 +71,13 @@ jobs:
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v5
+        if: github.event_name == 'release'
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
       - name: Push to Poggit branch
         uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-        if: github.event_name == 'release'
+        if: steps.import_gpg.outputs
         with:
           # Additional arguments for the git commit command. The --message argument is already set by the message input.
           # Default: ''
