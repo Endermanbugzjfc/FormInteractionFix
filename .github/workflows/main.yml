@@ -156,7 +156,7 @@ jobs:
     timeout-minutes: 1
     strategy:
       matrix:
-        pm: [4, 4.0.0]
+        pm: [4, 4.0.0, 5, 5.0.0]
         container-prefix: [form-interaction-fix]
     steps:
       - name: Checkout for IntegratedTest.php
@@ -173,7 +173,7 @@ jobs:
           pmmp/pocketmine-mp:${{ matrix.pm }}
           start-pocketmine --debug.level=2 --auto-report.enabled=0;
 
-          wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/181430/FakePlayer_dev-59.phar;
+          wget -O /home/runner/plugins/FakePlayer.phar https://poggit.pmmp.io/r/208252/FakePlayer_dev-64.phar;
           docker cp /home/runner/plugins/ ${{ matrix.container-prefix }}-pocketmine:/;
           docker cp IntegratedTest.php ${{ matrix.container-prefix }}-pocketmine:/plugins/IntegratedTest.php;
 
