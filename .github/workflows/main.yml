@@ -104,9 +104,13 @@ jobs:
           pm-version-major: 5
       - name: Install Composer
         run: curl -sS https://getcomposer.org/installer | php
-      - run: composer install
-      - run: composer all
+      - run: |
+          composer install --ignore-platform-reqs
+          composer fmt
+          composer build
+          composer lint
       - name: Rename artifact
+        if: ${{ always() }}
         run: mv hack/output.phar hack/${{ github.event.repository.name }}.phar
       - uses: actions/upload-artifact@v3
         if: github.event_name != 'release'
