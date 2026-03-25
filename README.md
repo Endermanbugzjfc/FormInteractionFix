@@ -45,7 +45,7 @@ Performs integrated tests with [FakePlayer by Muqsit](https://github.com/muqsit/
 ## PHPStan & PHP-CS-Fixer
 Common PHP dev tools:
 - [PHPStan](https://github.com/phpstan/phpstan): lint. (static code check.)
-- [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer): fixes code standard. (Format code, replace FQCN with `use`, etc... Do not get confused with [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)!)
+- [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer): fixes code standard. (Format code, replace FQCN with `use`, etc... Do not get confused with [PHP_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer)!)
 
 # Credit
 - Icon from https://windows93.net
